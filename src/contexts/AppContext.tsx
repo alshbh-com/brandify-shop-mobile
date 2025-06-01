@@ -34,7 +34,9 @@ interface AppContextType {
   signUp: (name: string, email: string, password: string, birthDate: string) => Promise<any>;
   signIn: (email: string, password: string) => Promise<any>;
   signOut: () => Promise<void>;
+  logout: () => Promise<void>;
   updateProfile: (updates: any) => Promise<any>;
+  updateUserProfile: (updates: any) => Promise<any>;
   
   // Products & Categories
   products: Product[];
@@ -50,7 +52,11 @@ interface AppContextType {
   // Store Settings
   settings: any;
   settingsLoading: boolean;
+  storeName: string;
+  welcomeImage: string;
   updateSettings: (updates: any) => Promise<any>;
+  updateStoreName: (name: string) => Promise<any>;
+  updateWelcomeImage: (image: string) => Promise<any>;
   checkAdminPassword: (password: string) => boolean;
   
   // Cart & Admin
@@ -93,6 +99,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const adminLogout = () => {
     setIsAdmin(false);
+  };
+
+  const logout = async () => {
+    await auth.signOut();
+    setIsAdmin(false);
+  };
+
+  const updateStoreName = async (name: string) => {
+    return await storeSettings.updateSettings({ store_name: name });
+  };
+
+  const updateWelcomeImage = async (image: string) => {
+    return await storeSettings.updateSettings({ welcome_image: image });
   };
 
   const addToCart = (product: Product) => {
@@ -140,7 +159,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     signUp: auth.signUp,
     signIn: auth.signIn,
     signOut: auth.signOut,
+    logout,
     updateProfile: profile.updateProfile,
+    updateUserProfile: profile.updateProfile,
     
     // Products & Categories
     products: products.products,
@@ -156,7 +177,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Store Settings
     settings: storeSettings.settings,
     settingsLoading: storeSettings.loading,
+    storeName: storeSettings.settings?.store_name || 'متجر البرندات',
+    welcomeImage: storeSettings.settings?.welcome_image || '/placeholder.svg',
     updateSettings: storeSettings.updateSettings,
+    updateStoreName,
+    updateWelcomeImage,
     checkAdminPassword: storeSettings.checkAdminPassword,
     
     // Cart & Admin

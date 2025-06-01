@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +15,7 @@ const AdminPanel = () => {
   const [productForm, setProductForm] = useState({
     name: '',
     price: '',
-    category: '',
+    category_id: '',
     description: '',
     image: ''
   });
@@ -62,7 +61,7 @@ const AdminPanel = () => {
 
   const handleProductSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!productForm.name || !productForm.price || !productForm.category) {
+    if (!productForm.name || !productForm.price || !productForm.category_id) {
       alert('يرجى ملء جميع الحقول المطلوبة');
       return;
     }
@@ -70,7 +69,7 @@ const AdminPanel = () => {
     const productData = {
       name: productForm.name,
       price: parseFloat(productForm.price),
-      category: productForm.category,
+      category_id: productForm.category_id,
       description: productForm.description,
       image: productForm.image || '/placeholder.svg'
     };
@@ -82,7 +81,7 @@ const AdminPanel = () => {
       addProduct(productData);
     }
 
-    setProductForm({ name: '', price: '', category: '', description: '', image: '' });
+    setProductForm({ name: '', price: '', category_id: '', description: '', image: '' });
     setShowProductForm(false);
   };
 
@@ -114,7 +113,7 @@ const AdminPanel = () => {
     setProductForm({
       name: product.name,
       price: product.price.toString(),
-      category: product.category,
+      category_id: product.category_id,
       description: product.description,
       image: product.image
     });
@@ -128,6 +127,11 @@ const AdminPanel = () => {
       image: category.image
     });
     setShowCategoryForm(true);
+  };
+
+  const getCategoryName = (categoryId: string) => {
+    const category = categories.find(c => c.id === categoryId);
+    return category ? category.name : 'غير محدد';
   };
 
   return (
@@ -242,7 +246,7 @@ const AdminPanel = () => {
                       />
                       <div className="flex-1">
                         <h3 className="font-semibold">{product.name}</h3>
-                        <p className="text-sm text-gray-500">{product.category}</p>
+                        <p className="text-sm text-gray-500">{getCategoryName(product.category_id)}</p>
                         <p className="text-blue-600 font-bold">{product.price} ر.س</p>
                       </div>
                       <div className="flex gap-2">
@@ -334,7 +338,7 @@ const AdminPanel = () => {
                   onClick={() => {
                     setShowProductForm(false);
                     setEditingProduct(null);
-                    setProductForm({ name: '', price: '', category: '', description: '', image: '' });
+                    setProductForm({ name: '', price: '', category_id: '', description: '', image: '' });
                   }}
                   variant="ghost"
                   size="sm"
@@ -367,14 +371,14 @@ const AdminPanel = () => {
                 <div>
                   <label className="block text-sm font-medium mb-1">القسم *</label>
                   <select
-                    value={productForm.category}
-                    onChange={(e) => setProductForm(prev => ({ ...prev, category: e.target.value }))}
+                    value={productForm.category_id}
+                    onChange={(e) => setProductForm(prev => ({ ...prev, category_id: e.target.value }))}
                     className="w-full p-2 border border-gray-300 rounded-md"
                     required
                   >
                     <option value="">اختر القسم</option>
                     {categories.map(category => (
-                      <option key={category.id} value={category.name}>
+                      <option key={category.id} value={category.id}>
                         {category.name}
                       </option>
                     ))}

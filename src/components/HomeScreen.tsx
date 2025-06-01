@@ -21,9 +21,14 @@ const HomeScreen = () => {
     isAdmin 
   } = useApp();
 
+  const getCategoryName = (categoryId: string) => {
+    const category = categories.find(c => c.id === categoryId);
+    return category ? category.name : 'غير محدد';
+  };
+
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'all' || product.category_id === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -82,9 +87,9 @@ const HomeScreen = () => {
           {categories.map(category => (
             <button
               key={category.id}
-              onClick={() => setSelectedCategory(category.name)}
+              onClick={() => setSelectedCategory(category.id)}
               className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors ${
-                selectedCategory === category.name
+                selectedCategory === category.id
                   ? 'bg-blue-500 text-white'
                   : 'bg-white text-gray-600 border border-gray-200'
               }`}
@@ -112,7 +117,7 @@ const HomeScreen = () => {
                 <h3 className="font-semibold text-gray-800 text-sm mb-1 line-clamp-2">
                   {product.name}
                 </h3>
-                <p className="text-xs text-gray-500 mb-2">{product.category}</p>
+                <p className="text-xs text-gray-500 mb-2">{getCategoryName(product.category_id)}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-bold text-blue-600">
                     {product.price} ر.س
