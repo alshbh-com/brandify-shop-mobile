@@ -27,12 +27,28 @@ export const useStoreSettings = () => {
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching store settings:', error);
+        // Provide default settings if none exist
+        const defaultSettings: StoreSettings = {
+          id: 'default',
+          store_name: 'متجر البرندات',
+          welcome_image: '/placeholder.svg',
+          admin_password: '01278006248'
+        };
+        setSettings(defaultSettings);
         return;
       }
 
       setSettings(data);
     } catch (error) {
       console.error('Error fetching store settings:', error);
+      // Provide default settings on error
+      const defaultSettings: StoreSettings = {
+        id: 'default',
+        store_name: 'متجر البرندات',
+        welcome_image: '/placeholder.svg',
+        admin_password: '01278006248'
+      };
+      setSettings(defaultSettings);
     } finally {
       setLoading(false);
     }

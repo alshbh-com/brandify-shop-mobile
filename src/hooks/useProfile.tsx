@@ -36,12 +36,30 @@ export const useProfile = () => {
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching profile:', error);
+        // Create a fallback profile from user metadata if database profile doesn't exist
+        const fallbackProfile: Profile = {
+          id: user.id,
+          name: user.user_metadata?.name || user.email?.split('@')[0] || 'مستخدم جديد',
+          birth_date: user.user_metadata?.birth_date || new Date().toISOString().split('T')[0],
+          profile_image: '/placeholder.svg'
+        };
+        setProfile(fallbackProfile);
         return;
       }
 
       setProfile(data);
     } catch (error) {
       console.error('Error fetching profile:', error);
+      // Provide fallback profile
+      if (user) {
+        const fallbackProfile: Profile = {
+          id: user.id,
+          name: user.user_metadata?.name || user.email?.split('@')[0] || 'مستخدم جديد',
+          birth_date: user.user_metadata?.birth_date || new Date().toISOString().split('T')[0],
+          profile_image: '/placeholder.svg'
+        };
+        setProfile(fallbackProfile);
+      }
     } finally {
       setLoading(false);
     }

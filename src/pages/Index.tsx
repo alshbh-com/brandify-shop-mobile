@@ -18,8 +18,15 @@ const AppContent = () => {
   useEffect(() => {
     if (isAuthenticated && !showWelcome) {
       setShowWelcome(true);
+      
+      // Auto-hide welcome screen after 5 seconds if user doesn't interact
+      const timer = setTimeout(() => {
+        setShowWelcome(false);
+      }, 5000);
+      
+      return () => clearTimeout(timer);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, showWelcome]);
 
   const handleWelcomeNext = () => {
     setShowWelcome(false);
