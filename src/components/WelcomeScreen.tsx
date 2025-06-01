@@ -10,6 +10,10 @@ interface WelcomeScreenProps {
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
   const { settings, profile, settingsLoading, loading } = useApp();
 
+  console.log('WelcomeScreen - onNext function:', onNext);
+  console.log('WelcomeScreen - settingsLoading:', settingsLoading);
+  console.log('WelcomeScreen - loading:', loading);
+
   // Don't show loading indefinitely - show welcome screen with defaults after reasonable time
   const isLoading = settingsLoading || loading;
   
@@ -17,6 +21,16 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
   const storeName = settings?.store_name || 'متجر البرندات';
   const welcomeImage = settings?.welcome_image || '/placeholder.svg';
   const userName = profile?.name || 'عزيزنا العميل';
+
+  const handleStartShopping = () => {
+    console.log('Start shopping button clicked');
+    console.log('Calling onNext function...');
+    if (onNext && typeof onNext === 'function') {
+      onNext();
+    } else {
+      console.error('onNext is not a function:', onNext);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 flex flex-col items-center justify-center p-6">
@@ -53,7 +67,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
             </p>
             
             <Button
-              onClick={onNext}
+              onClick={handleStartShopping}
               className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white font-bold py-4 px-8 rounded-full text-lg shadow-lg transform hover:scale-105 transition-all duration-200"
             >
               ابدأ التسوق
