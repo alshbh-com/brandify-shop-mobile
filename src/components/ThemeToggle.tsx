@@ -12,7 +12,7 @@ const ThemeToggle = () => {
       variant="outline"
       size="icon"
       onClick={toggleTheme}
-      className="fixed top-4 right-4 z-50 bg-white dark:bg-gray-800 shadow-lg"
+      className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-white dark:bg-gray-800 shadow-lg"
     >
       {theme === 'light' ? (
         <Moon className="h-4 w-4" />
