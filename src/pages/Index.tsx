@@ -12,19 +12,23 @@ import BottomNavigation from '@/components/BottomNavigation';
 
 const AppContent = () => {
   const [showWelcome, setShowWelcome] = useState(false);
+  const [hasSeenWelcome, setHasSeenWelcome] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
   
   const { isAuthenticated, isAdmin, cart } = useApp();
 
   console.log('AppContent - isAuthenticated:', isAuthenticated);
   console.log('AppContent - showWelcome:', showWelcome);
+  console.log('AppContent - hasSeenWelcome:', hasSeenWelcome);
   console.log('AppContent - isAdmin:', isAdmin);
 
   useEffect(() => {
     console.log('AppContent useEffect - isAuthenticated changed:', isAuthenticated);
-    if (isAuthenticated && !showWelcome) {
-      console.log('Setting showWelcome to true');
+    // Only show welcome screen if user just authenticated and hasn't seen it yet
+    if (isAuthenticated && !hasSeenWelcome) {
+      console.log('Setting showWelcome to true for first time');
       setShowWelcome(true);
+      setHasSeenWelcome(true);
       
       // Auto-hide welcome screen after 10 seconds if user doesn't interact
       const timer = setTimeout(() => {
@@ -37,10 +41,18 @@ const AppContent = () => {
         clearTimeout(timer);
       };
     }
-  }, [isAuthenticated, showWelcome]);
+  }, [isAuthenticated, hasSeenWelcome]);
+
+  // Reset hasSeenWelcome when user logs out
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setHasSeenWelcome(false);
+      setShowWelcome(false);
+    }
+  }, [isAuthenticated]);
 
   const handleWelcomeNext = () => {
-    console.log('handleWelcomeNext called - hiding welcome screen');
+    console.log('handleWelcomeNext called - hiding welcome screen permanently');
     setShowWelcome(false);
   };
 
