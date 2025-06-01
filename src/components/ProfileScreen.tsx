@@ -93,6 +93,8 @@ const ProfileScreen = () => {
         return <Sun size={16} />;
       case 'dark':
         return <Moon size={16} />;
+      case 'system':
+        return <Monitor size={16} />;
       default:
         return <Monitor size={16} />;
     }

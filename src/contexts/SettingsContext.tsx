@@ -4,9 +4,9 @@ import { useSettings } from '@/hooks/useSettings';
 
 interface SettingsContextType {
   language: 'ar' | 'en';
-  theme: 'light' | 'dark';
+  theme: 'light' | 'dark' | 'system';
   updateLanguage: (language: 'ar' | 'en') => void;
-  updateTheme: (theme: 'light' | 'dark') => void;
+  updateTheme: (theme: 'light' | 'dark' | 'system') => void;
   toggleTheme: () => void;
   t: (key: string) => string;
 }
@@ -51,6 +51,7 @@ const translations = {
     theme: 'المظهر',
     lightMode: 'الوضع الفاتح',
     darkMode: 'الوضع الداكن',
+    systemMode: 'وضع النظام',
     
     // Validation Messages
     fillAllFields: 'يرجى ملء جميع الحقول المطلوبة',
@@ -86,6 +87,7 @@ const translations = {
     theme: 'Theme',
     lightMode: 'Light Mode',
     darkMode: 'Dark Mode',
+    systemMode: 'System Mode',
     
     // Validation Messages
     fillAllFields: 'Please fill in all required fields',
@@ -101,7 +103,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     updateSettings({ language });
   };
 
-  const updateTheme = (theme: 'light' | 'dark') => {
+  const updateTheme = (theme: 'light' | 'dark' | 'system') => {
     updateSettings({ theme });
   };
 

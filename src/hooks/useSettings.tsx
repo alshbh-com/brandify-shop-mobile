@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 
 interface UserSettings {
   language: 'ar' | 'en';
-  theme: 'light' | 'dark';
+  theme: 'light' | 'dark' | 'system';
 }
 
 export const useSettings = () => {
@@ -42,9 +42,16 @@ export const useSettings = () => {
     document.documentElement.lang = settings.language;
   }, [settings]);
 
-  const applyTheme = (theme: 'light' | 'dark') => {
+  const applyTheme = (theme: 'light' | 'dark' | 'system') => {
     const root = document.documentElement;
-    root.classList.toggle('dark', theme === 'dark');
+    
+    if (theme === 'system') {
+      // استخدام إعدادات النظام
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.classList.toggle('dark', systemPrefersDark);
+    } else {
+      root.classList.toggle('dark', theme === 'dark');
+    }
   };
 
   const updateSettings = (newSettings: Partial<UserSettings>) => {
