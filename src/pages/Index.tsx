@@ -9,10 +9,14 @@ import CartScreen from '@/components/CartScreen';
 import ProfileScreen from '@/components/ProfileScreen';
 import AdminPanel from '@/components/AdminPanel';
 import BottomNavigation from '@/components/BottomNavigation';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const AppContent = () => {
   const [showWelcome, setShowWelcome] = useState(false);
-  const [hasSeenWelcome, setHasSeenWelcome] = useState(false);
+  const [hasSeenWelcome, setHasSeenWelcome] = useState(() => {
+    // التحقق من localStorage لمعرفة إذا كان المستخدم رأى شاشة الترحيب من قبل
+    return localStorage.getItem('hasSeenWelcome') === 'true';
+  });
   const [activeTab, setActiveTab] = useState('home');
   
   const { isAuthenticated, isAdmin, cart } = useApp();
@@ -24,16 +28,15 @@ const AppContent = () => {
 
   useEffect(() => {
     console.log('AppContent useEffect - isAuthenticated changed:', isAuthenticated);
-    // Only show welcome screen if user just authenticated and hasn't seen it yet
+    // إظهار شاشة الترحيب فقط إذا كان المستخدم مسجل الدخول ولم يرها من قبل
     if (isAuthenticated && !hasSeenWelcome) {
       console.log('Setting showWelcome to true for first time');
       setShowWelcome(true);
-      setHasSeenWelcome(true);
       
-      // Auto-hide welcome screen after 10 seconds if user doesn't interact
+      // إخفاء شاشة الترحيب تلقائياً بعد 10 ثوان
       const timer = setTimeout(() => {
         console.log('Auto-hiding welcome screen after timeout');
-        setShowWelcome(false);
+        handleWelcomeNext();
       }, 10000);
       
       return () => {
@@ -43,34 +46,52 @@ const AppContent = () => {
     }
   }, [isAuthenticated, hasSeenWelcome]);
 
-  // Reset hasSeenWelcome when user logs out
+  // إعادة تعيين hasSeenWelcome عند تسجيل الخروج
   useEffect(() => {
     if (!isAuthenticated) {
       setHasSeenWelcome(false);
       setShowWelcome(false);
+      localStorage.removeItem('hasSeenWelcome');
     }
   }, [isAuthenticated]);
 
   const handleWelcomeNext = () => {
     console.log('handleWelcomeNext called - hiding welcome screen permanently');
     setShowWelcome(false);
+    setHasSeenWelcome(true);
+    localStorage.setItem('hasSeenWelcome', 'true');
   };
 
   const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   if (!isAuthenticated) {
     console.log('Rendering AuthScreen');
-    return <AuthScreen />;
+    return (
+      <>
+        <ThemeToggle />
+        <AuthScreen />
+      </>
+    );
   }
 
   if (isAdmin) {
     console.log('Rendering AdminPanel');
-    return <AdminPanel />;
+    return (
+      <>
+        <ThemeToggle />
+        <AdminPanel />
+      </>
+    );
   }
 
   if (showWelcome) {
     console.log('Rendering WelcomeScreen with handleWelcomeNext:', handleWelcomeNext);
-    return <WelcomeScreen onNext={handleWelcomeNext} />;
+    return (
+      <>
+        <ThemeToggle />
+        <WelcomeScreen onNext={handleWelcomeNext} />
+      </>
+    );
   }
 
   console.log('Rendering main app with activeTab:', activeTab);
@@ -90,6 +111,7 @@ const AppContent = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <ThemeToggle />
       {renderActiveScreen()}
       <BottomNavigation
         activeTab={activeTab}

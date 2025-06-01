@@ -9,19 +9,15 @@ interface WelcomeScreenProps {
 }
 
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
-  const { settings, profile, settingsLoading, loading } = useApp();
+  const { profile, loading } = useApp();
   const { t } = useSettingsContext();
 
   console.log('WelcomeScreen - onNext function:', onNext);
-  console.log('WelcomeScreen - settingsLoading:', settingsLoading);
   console.log('WelcomeScreen - loading:', loading);
 
-  // Don't show loading indefinitely - show welcome screen with defaults after reasonable time
-  const isLoading = settingsLoading || loading;
-  
-  // Use fallback values if data is not available
-  const storeName = settings?.store_name || 'متجر البرندات';
-  const welcomeImage = settings?.welcome_image || '/placeholder.svg';
+  // استخدام قيم افتراضية بسيطة
+  const storeName = 'متجر البرندات';
+  const welcomeImage = '/placeholder.svg';
   const userName = profile?.name || t('dearCustomer');
 
   const handleStartShopping = () => {
@@ -42,7 +38,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 dark:from-purple-900 dark:to-blue-900 flex flex-col items-center justify-center p-6">
       <div className="text-center max-w-lg mx-auto">
-        {isLoading ? (
+        {loading ? (
           <div className="mb-8">
             <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-gray-600 dark:text-gray-300">{t('loading')}</p>

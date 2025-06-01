@@ -3,17 +3,17 @@ import { useState, useEffect } from 'react';
 
 interface UserSettings {
   language: 'ar' | 'en';
-  theme: 'light' | 'dark' | 'system';
+  theme: 'light' | 'dark';
 }
 
 export const useSettings = () => {
   const [settings, setSettings] = useState<UserSettings>({
     language: 'ar',
-    theme: 'system'
+    theme: 'light' // الوضع الافتراضي فاتح
   });
 
   useEffect(() => {
-    // Load settings from localStorage
+    // تحميل الإعدادات من localStorage
     const savedSettings = localStorage.getItem('userSettings');
     if (savedSettings) {
       try {
@@ -23,7 +23,7 @@ export const useSettings = () => {
         console.error('Error parsing saved settings:', error);
       }
     } else {
-      // Detect system language
+      // اكتشاف لغة النظام
       const browserLang = navigator.language || navigator.languages[0];
       const detectedLang = browserLang.startsWith('ar') ? 'ar' : 'en';
       setSettings(prev => ({ ...prev, language: detectedLang }));
@@ -31,34 +31,36 @@ export const useSettings = () => {
   }, []);
 
   useEffect(() => {
-    // Save settings to localStorage whenever they change
+    // حفظ الإعدادات في localStorage عند تغييرها
     localStorage.setItem('userSettings', JSON.stringify(settings));
     
-    // Apply theme
+    // تطبيق الثيم
     applyTheme(settings.theme);
     
-    // Apply language direction
+    // تطبيق اتجاه اللغة
     document.documentElement.dir = settings.language === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = settings.language;
   }, [settings]);
 
-  const applyTheme = (theme: 'light' | 'dark' | 'system') => {
+  const applyTheme = (theme: 'light' | 'dark') => {
     const root = document.documentElement;
-    
-    if (theme === 'system') {
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      root.classList.toggle('dark', systemPrefersDark);
-    } else {
-      root.classList.toggle('dark', theme === 'dark');
-    }
+    root.classList.toggle('dark', theme === 'dark');
   };
 
   const updateSettings = (newSettings: Partial<UserSettings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
   };
 
+  const toggleTheme = () => {
+    setSettings(prev => ({ 
+      ...prev, 
+      theme: prev.theme === 'light' ? 'dark' : 'light' 
+    }));
+  };
+
   return {
     settings,
-    updateSettings
+    updateSettings,
+    toggleTheme
   };
 };
