@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useProducts } from '@/hooks/useProducts';
@@ -86,8 +86,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const products = useProducts();
   const storeSettings = useStoreSettings();
   
-  const [cart, setCart] = useState<CartItem[]>([]);
+  // تحميل السلة من localStorage عند بدء التطبيق
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    try {
+      const savedCart = localStorage.getItem('shopping_cart');
+      return savedCart ? JSON.parse(savedCart) : [];
+    } catch (error) {
+      console.error('Error loading cart from localStorage:', error);
+      return [];
+    }
+  });
+  
   const [isAdmin, setIsAdmin] = useState(false);
+
+  // حفظ السلة في localStorage عند تغييرها
+  useEffect(() => {
+    try {
+      localStorage.setItem('shopping_cart', JSON.stringify(cart));
+    } catch (error) {
+      console.error('Error saving cart to localStorage:', error);
+    }
+  }, [cart]);
+
+  // مسح السلة عند تسجيل الخروج
+  useEffect(() => {
+    if (!auth.user) {
+      setCart([]);
+      localStorage.removeItem('shopping_cart');
+    }
+  }, [auth.user]);
 
   const adminLogin = (password: string): boolean => {
     if (storeSettings.checkAdminPassword(password)) {
@@ -104,6 +131,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const logout = async () => {
     await auth.signOut();
     setIsAdmin(false);
+    setCart([]);
+    localStorage.removeItem('shopping_cart');
   };
 
   const updateStoreName = async (name: string) => {
@@ -148,6 +177,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const clearCart = () => {
     setCart([]);
+    localStorage.removeItem('shopping_cart');
   };
 
   const value: AppContextType = {

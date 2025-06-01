@@ -9,15 +9,14 @@ interface WelcomeScreenProps {
 }
 
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
-  const { profile, loading } = useApp();
+  const { profile, loading, storeName, welcomeImage } = useApp();
   const { t } = useSettingsContext();
 
   console.log('WelcomeScreen - onNext function:', onNext);
   console.log('WelcomeScreen - loading:', loading);
+  console.log('WelcomeScreen - storeName:', storeName);
+  console.log('WelcomeScreen - welcomeImage:', welcomeImage);
 
-  // استخدام قيم افتراضية بسيطة
-  const storeName = 'متجر البرندات';
-  const welcomeImage = '/placeholder.svg';
   const userName = profile?.name || t('dearCustomer');
 
   const handleStartShopping = () => {
