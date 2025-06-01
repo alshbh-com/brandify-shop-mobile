@@ -9,7 +9,125 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          image: string | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          image?: string | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          image?: string | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          category_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          image: string | null
+          name: string
+          price: number
+          updated_at: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image?: string | null
+          name: string
+          price: number
+          updated_at?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image?: string | null
+          name?: string
+          price?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          birth_date: string
+          created_at: string | null
+          id: string
+          name: string
+          profile_image: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          birth_date: string
+          created_at?: string | null
+          id: string
+          name: string
+          profile_image?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          birth_date?: string
+          created_at?: string | null
+          id?: string
+          name?: string
+          profile_image?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      store_settings: {
+        Row: {
+          admin_password: string
+          created_at: string | null
+          id: string
+          store_name: string
+          updated_at: string | null
+          welcome_image: string | null
+        }
+        Insert: {
+          admin_password?: string
+          created_at?: string | null
+          id?: string
+          store_name?: string
+          updated_at?: string | null
+          welcome_image?: string | null
+        }
+        Update: {
+          admin_password?: string
+          created_at?: string | null
+          id?: string
+          store_name?: string
+          updated_at?: string | null
+          welcome_image?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

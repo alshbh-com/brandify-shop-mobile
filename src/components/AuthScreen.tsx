@@ -14,42 +14,46 @@ const AuthScreen = () => {
     birthDate: ''
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   
-  const { login, register } = useApp();
+  const { signIn, signUp } = useApp();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
     try {
       if (isLogin) {
-        const success = await login(formData.email, formData.password);
-        if (!success) {
-          alert('بيانات الدخول غير صحيحة');
-        }
+        await signIn(formData.email, formData.password);
       } else {
         if (!formData.name || !formData.email || !formData.password || !formData.birthDate) {
-          alert('يرجى ملء جميع الحقول');
-          setLoading(false);
+          setError('يرجى ملء جميع الحقول');
           return;
         }
         
-        const success = await register(formData.name, formData.email, formData.password, formData.birthDate);
-        if (success) {
-          alert('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول');
-          setIsLogin(true);
-          setFormData({ name: '', email: '', password: '', birthDate: '' });
-        }
+        await signUp(formData.name, formData.email, formData.password, formData.birthDate);
+        setError('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول');
+        setIsLogin(true);
+        setFormData({ name: '', email: '', password: '', birthDate: '' });
       }
-    } catch (error) {
-      alert('حدث خطأ، يرجى المحاولة مرة أخرى');
+    } catch (error: any) {
+      console.error('Auth error:', error);
+      if (error.message.includes('Invalid login credentials')) {
+        setError('بيانات الدخول غير صحيحة');
+      } else if (error.message.includes('User already registered')) {
+        setError('هذا البريد الإلكتروني مسجل مسبقاً');
+      } else {
+        setError(error.message || 'حدث خطأ، يرجى المحاولة مرة أخرى');
+      }
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    setError('');
   };
 
   return (
@@ -65,6 +69,16 @@ const AuthScreen = () => {
         </CardHeader>
         
         <CardContent className="space-y-4">
+          {error && (
+            <div className={`p-3 rounded-lg text-sm ${
+              error.includes('بنجاح') 
+                ? 'bg-green-50 text-green-700 border border-green-200' 
+                : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
+              {error}
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div className="space-y-2">
@@ -132,6 +146,7 @@ const AuthScreen = () => {
               onClick={() => {
                 setIsLogin(!isLogin);
                 setFormData({ name: '', email: '', password: '', birthDate: '' });
+                setError('');
               }}
               className="text-blue-600 hover:text-blue-700 transition-colors text-sm font-medium"
             >
