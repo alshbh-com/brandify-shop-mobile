@@ -3,13 +3,13 @@ import { useState, useEffect } from 'react';
 
 interface UserSettings {
   language: 'ar' | 'en';
-  theme: 'light' | 'dark' | 'system';
+  theme: 'light';
 }
 
 export const useSettings = () => {
   const [settings, setSettings] = useState<UserSettings>({
     language: 'ar',
-    theme: 'light' // الوضع الافتراضي فاتح
+    theme: 'light' // دائماً فاتح
   });
 
   useEffect(() => {
@@ -18,7 +18,8 @@ export const useSettings = () => {
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings);
-        setSettings(parsed);
+        // التأكد من أن الثيم فاتح دائماً
+        setSettings({ ...parsed, theme: 'light' });
       } catch (error) {
         console.error('Error parsing saved settings:', error);
       }
@@ -34,40 +35,21 @@ export const useSettings = () => {
     // حفظ الإعدادات في localStorage عند تغييرها
     localStorage.setItem('userSettings', JSON.stringify(settings));
     
-    // تطبيق الثيم
-    applyTheme(settings.theme);
+    // تطبيق الثيم الفاتح دائماً
+    document.documentElement.classList.remove('dark');
     
     // تطبيق اتجاه اللغة
     document.documentElement.dir = settings.language === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = settings.language;
   }, [settings]);
 
-  const applyTheme = (theme: 'light' | 'dark' | 'system') => {
-    const root = document.documentElement;
-    
-    if (theme === 'system') {
-      // استخدام إعدادات النظام
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      root.classList.toggle('dark', systemPrefersDark);
-    } else {
-      root.classList.toggle('dark', theme === 'dark');
-    }
-  };
-
   const updateSettings = (newSettings: Partial<UserSettings>) => {
-    setSettings(prev => ({ ...prev, ...newSettings }));
-  };
-
-  const toggleTheme = () => {
-    setSettings(prev => ({ 
-      ...prev, 
-      theme: prev.theme === 'light' ? 'dark' : 'light' 
-    }));
+    // التأكد من أن الثيم يبقى فاتح
+    setSettings(prev => ({ ...prev, ...newSettings, theme: 'light' }));
   };
 
   return {
     settings,
-    updateSettings,
-    toggleTheme
+    updateSettings
   };
 };
