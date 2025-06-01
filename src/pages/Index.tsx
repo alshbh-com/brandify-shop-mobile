@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from '@/contexts/AppContext';
+import { SettingsProvider } from '@/contexts/SettingsContext';
 import AuthScreen from '@/components/AuthScreen';
 import WelcomeScreen from '@/components/WelcomeScreen';
 import HomeScreen from '@/components/HomeScreen';
@@ -56,7 +57,7 @@ const AppContent = () => {
   }
 
   if (showWelcome) {
-    console.log('Rendering WelcomeScreen');
+    console.log('Rendering WelcomeScreen with handleWelcomeNext:', handleWelcomeNext);
     return <WelcomeScreen onNext={handleWelcomeNext} />;
   }
 
@@ -76,7 +77,7 @@ const AppContent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {renderActiveScreen()}
       <BottomNavigation
         activeTab={activeTab}
@@ -89,9 +90,11 @@ const AppContent = () => {
 
 const Index = () => {
   return (
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
+    <SettingsProvider>
+      <AppProvider>
+        <AppContent />
+      </AppProvider>
+    </SettingsProvider>
   );
 };
 
