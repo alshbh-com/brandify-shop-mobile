@@ -11,27 +11,48 @@ const ThemeManager = () => {
   const currentThemeId = settings?.theme_id || 1;
   const currentTheme = getThemeById(currentThemeId);
 
+  const applyThemeToDocument = (theme: any) => {
+    const root = document.documentElement;
+    
+    // تطبيق متغيرات CSS المخصصة
+    root.style.setProperty('--theme-primary', theme.colors.primary);
+    root.style.setProperty('--theme-secondary', theme.colors.secondary);
+    root.style.setProperty('--theme-accent', theme.colors.accent);
+    root.style.setProperty('--theme-background', theme.colors.background);
+    root.style.setProperty('--theme-surface', theme.colors.surface);
+    root.style.setProperty('--theme-text', theme.colors.text);
+    root.style.setProperty('--theme-text-secondary', theme.colors.textSecondary);
+    
+    // تطبيق التدرجات
+    root.style.setProperty('--theme-gradient-header', theme.gradients.header);
+    root.style.setProperty('--theme-gradient-card', theme.gradients.card);
+    root.style.setProperty('--theme-gradient-button', theme.gradients.button);
+    
+    // تطبيق التصميم على الصفحة فوراً
+    document.body.style.backgroundColor = theme.colors.background;
+    document.body.style.color = theme.colors.text;
+    
+    console.log('Theme applied to document:', theme.name);
+  };
+
   const changeTheme = async (themeId: number) => {
     try {
       console.log('Changing theme to:', themeId);
+      
+      // تطبيق التصميم فوراً قبل حفظه
+      const newTheme = getThemeById(themeId);
+      applyThemeToDocument(newTheme);
+      
+      // حفظ التصميم في قاعدة البيانات
       await updateSettings({ theme_id: themeId });
       
-      // تطبيق التصميم فوراً
-      const newTheme = getThemeById(themeId);
-      const root = document.documentElement;
+      console.log('Theme applied and saved successfully:', newTheme.name);
       
-      root.style.setProperty('--theme-primary', newTheme.colors.primary);
-      root.style.setProperty('--theme-secondary', newTheme.colors.secondary);
-      root.style.setProperty('--theme-accent', newTheme.colors.accent);
-      root.style.setProperty('--theme-background', newTheme.colors.background);
-      root.style.setProperty('--theme-surface', newTheme.colors.surface);
-      root.style.setProperty('--theme-text', newTheme.colors.text);
-      root.style.setProperty('--theme-text-secondary', newTheme.colors.textSecondary);
-      root.style.setProperty('--theme-gradient-header', newTheme.gradients.header);
-      root.style.setProperty('--theme-gradient-card', newTheme.gradients.card);
-      root.style.setProperty('--theme-gradient-button', newTheme.gradients.button);
+      // إعادة تحميل الصفحة لضمان تطبيق التصميم على جميع العناصر
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
       
-      console.log('Theme applied successfully:', newTheme.name);
     } catch (error) {
       console.error('Error updating theme:', error);
     }

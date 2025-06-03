@@ -13,79 +13,143 @@
   --theme-gradient-button: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
 }
 
-/* تطبيق التصميمات المخصصة */
-.theme-header {
+/* تطبيق التصميمات على العناصر الأساسية */
+body {
+  background-color: var(--theme-background) !important;
+  color: var(--theme-text) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* تطبيق التصميم على البطاقات */
+.bg-white,
+.bg-gray-50,
+.bg-gray-100 {
+  background-color: var(--theme-surface) !important;
+}
+
+/* تطبيق التصميم على الهيدر */
+.bg-gradient-to-r.from-purple-500.to-blue-600,
+.themed-header {
   background: var(--theme-gradient-header) !important;
 }
 
-.theme-card {
-  background: var(--theme-gradient-card) !important;
-}
-
-.theme-button {
+/* تطبيق التصميم على الأزرار */
+.bg-blue-500,
+.bg-green-500,
+.bg-purple-500,
+.themed-button {
   background: var(--theme-gradient-button) !important;
   color: white !important;
 }
 
-.theme-primary {
-  color: var(--theme-primary) !important;
+.bg-blue-600:hover,
+.bg-green-600:hover,
+.bg-purple-600:hover,
+.themed-button:hover {
+  background: var(--theme-gradient-button) !important;
+  opacity: 0.9 !important;
 }
 
-.theme-bg-primary {
+/* تطبيق التصميم على النصوص */
+.text-gray-900,
+.text-gray-800,
+.text-gray-700 {
+  color: var(--theme-text) !important;
+}
+
+.text-gray-600,
+.text-gray-500 {
+  color: var(--theme-text-secondary) !important;
+}
+
+/* تطبيق التصميم على الحدود */
+.border-gray-200,
+.border-gray-300 {
+  border-color: var(--theme-accent) !important;
+}
+
+/* كلاسات مساعدة للتصميمات */
+.theme-primary-bg {
   background-color: var(--theme-primary) !important;
+}
+
+.theme-secondary-bg {
+  background-color: var(--theme-secondary) !important;
+}
+
+.theme-accent-bg {
+  background-color: var(--theme-accent) !important;
+}
+
+.theme-surface-bg {
+  background-color: var(--theme-surface) !important;
+}
+
+.theme-background-bg {
+  background-color: var(--theme-background) !important;
+}
+
+.theme-primary-text {
+  color: var(--theme-primary) !important;
 }
 
 .theme-text {
   color: var(--theme-text) !important;
 }
 
-.theme-surface {
-  background-color: var(--theme-surface) !important;
+.theme-text-secondary {
+  color: var(--theme-text-secondary) !important;
 }
 
-.theme-background {
-  background-color: var(--theme-background) !important;
-}
-
-/* تصميمات مخصصة للتطبيق على العناصر */
-.themed-gradient-bg {
+.theme-gradient-header {
   background: var(--theme-gradient-header) !important;
 }
 
-.themed-card-bg {
+.theme-gradient-card {
   background: var(--theme-gradient-card) !important;
 }
 
-.themed-button {
+.theme-gradient-button {
   background: var(--theme-gradient-button) !important;
   color: white !important;
 }
 
-.themed-button:hover {
+/* تطبيق التصميم على العناصر التفاعلية */
+.hover\:bg-blue-600:hover,
+.hover\:bg-green-600:hover,
+.hover\:bg-purple-600:hover {
+  background: var(--theme-gradient-button) !important;
   opacity: 0.9 !important;
 }
 
-/* تطبيق التصميم على العناصر الرئيسية */
-body {
-  background-color: var(--theme-background) !important;
+/* تطبيق التصميم على الأيقونات والعناصر المختارة */
+.bg-blue-50,
+.bg-green-50,
+.bg-purple-50 {
+  background-color: var(--theme-accent) !important;
+}
+
+.text-blue-600,
+.text-green-600,
+.text-purple-600 {
+  color: var(--theme-primary) !important;
+}
+
+.text-blue-700,
+.text-green-700,
+.text-purple-700 {
   color: var(--theme-text) !important;
 }
 
-/* تطبيق التصميم على الهيدر */
-.bg-gradient-to-r.from-purple-500.to-blue-600 {
-  background: var(--theme-gradient-header) !important;
+.text-blue-900,
+.text-green-900,
+.text-purple-900 {
+  color: var(--theme-text) !important;
+  font-weight: 600 !important;
 }
 
-/* تطبيق التصميم على البطاقات */
-.bg-white {
-  background-color: var(--theme-surface) !important;
-}
-
-/* تطبيق التصميم على الأزرار */
-.bg-blue-500 {
-  background: var(--theme-gradient-button) !important;
-}
-
-.bg-green-500 {
-  background: var(--theme-gradient-button) !important;
+.border-blue-500,
+.border-green-500,
+.border-purple-500 {
+  border-color: var(--theme-primary) !important;
 }

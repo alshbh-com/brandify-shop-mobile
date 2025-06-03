@@ -13,12 +13,14 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const ThemeWrapper = ({ children }: { children: React.ReactNode }) => {
-  const { settings } = useStoreSettings();
+  const { settings, loading } = useStoreSettings();
 
   useEffect(() => {
-    if (settings?.theme_id) {
+    if (!loading && settings?.theme_id) {
       const theme = getThemeById(settings.theme_id);
       const root = document.documentElement;
+      
+      console.log('Applying theme:', theme.name, 'with colors:', theme.colors);
       
       // تطبيق متغيرات CSS المخصصة
       root.style.setProperty('--theme-primary', theme.colors.primary);
@@ -34,9 +36,13 @@ const ThemeWrapper = ({ children }: { children: React.ReactNode }) => {
       root.style.setProperty('--theme-gradient-card', theme.gradients.card);
       root.style.setProperty('--theme-gradient-button', theme.gradients.button);
       
-      console.log('Global theme applied:', theme.name);
+      // تطبيق التصميم على الصفحة فوراً
+      document.body.style.backgroundColor = theme.colors.background;
+      document.body.style.color = theme.colors.text;
+      
+      console.log('Global theme applied successfully:', theme.name);
     }
-  }, [settings?.theme_id]);
+  }, [settings?.theme_id, loading]);
 
   return <>{children}</>;
 };
