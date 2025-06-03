@@ -3,10 +3,9 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
 import { useApp } from '@/contexts/AppContext';
 import { useSettingsContext } from '@/contexts/SettingsContext';
-import { User, Calendar, Mail, LogOut, Edit, Settings, Globe, Moon, Sun, Monitor } from 'lucide-react';
+import { User, Calendar, Mail, LogOut, Edit, Settings, Globe } from 'lucide-react';
 
 const ProfileScreen = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -18,7 +17,7 @@ const ProfileScreen = () => {
   });
 
   const { user, logout, updateUserProfile } = useApp();
-  const { language, theme, updateLanguage, updateTheme, t } = useSettingsContext();
+  const { language, updateLanguage, t } = useSettingsContext();
 
   const handleEditStart = () => {
     if (user) {
@@ -87,24 +86,11 @@ const ProfileScreen = () => {
 
   const userAge = calculateAge(user.birthDate);
 
-  const getThemeIcon = () => {
-    switch (theme) {
-      case 'light':
-        return <Sun size={16} />;
-      case 'dark':
-        return <Moon size={16} />;
-      case 'system':
-        return <Monitor size={16} />;
-      default:
-        return <Monitor size={16} />;
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 pb-20">
-      <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center">{t('profile')}</h1>
+    <div className="min-h-screen bg-gray-50 p-4 pb-20">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">{t('profile')}</h1>
       
-      <Card className="max-w-md mx-auto bg-white dark:bg-gray-800 shadow-lg mb-4">
+      <Card className="max-w-md mx-auto bg-white shadow-lg mb-4">
         <CardContent className="p-6">
           {/* Profile Image */}
           <div className="text-center mb-6">
@@ -133,15 +119,15 @@ const ProfileScreen = () => {
             <div className="flex items-center space-x-3 space-x-reverse">
               <User className="text-blue-500" size={20} />
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('name')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('name')}</label>
                 {isEditing ? (
                   <Input
                     value={editData.name}
                     onChange={(e) => setEditData(prev => ({ ...prev, name: e.target.value }))}
-                    className="border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                    className="border-gray-200"
                   />
                 ) : (
-                  <p className="text-gray-800 dark:text-gray-200 font-medium">{user.name}</p>
+                  <p className="text-gray-800 font-medium">{user.name}</p>
                 )}
               </div>
             </div>
@@ -149,24 +135,24 @@ const ProfileScreen = () => {
             <div className="flex items-center space-x-3 space-x-reverse">
               <Mail className="text-blue-500" size={20} />
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('email')}</label>
-                <p className="text-gray-800 dark:text-gray-200">{user.email}</p>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('email')}</label>
+                <p className="text-gray-800">{user.email}</p>
               </div>
             </div>
 
             <div className="flex items-center space-x-3 space-x-reverse">
               <Calendar className="text-blue-500" size={20} />
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('birthDate')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('birthDate')}</label>
                 {isEditing ? (
                   <Input
                     type="date"
                     value={editData.birthDate}
                     onChange={(e) => setEditData(prev => ({ ...prev, birthDate: e.target.value }))}
-                    className="border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                    className="border-gray-200"
                   />
                 ) : (
-                  <p className="text-gray-800 dark:text-gray-200">{user.birthDate}</p>
+                  <p className="text-gray-800">{user.birthDate}</p>
                 )}
               </div>
             </div>
@@ -176,8 +162,8 @@ const ProfileScreen = () => {
                 <span className="text-white text-xs font-bold">{userAge}</span>
               </div>
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('age')}</label>
-                <p className="text-gray-800 dark:text-gray-200">{userAge} {t('years')}</p>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('age')}</label>
+                <p className="text-gray-800">{userAge} {t('years')}</p>
               </div>
             </div>
           </div>
@@ -231,66 +217,33 @@ const ProfileScreen = () => {
         </CardContent>
       </Card>
 
-      {/* Settings Panel */}
+      {/* Settings Panel - Only Language Setting */}
       {showSettings && (
-        <Card className="max-w-md mx-auto bg-white dark:bg-gray-800 shadow-lg">
+        <Card className="max-w-md mx-auto bg-white shadow-lg">
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{t('settings')}</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">{t('settings')}</h3>
             
-            {/* Language Setting */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3 space-x-reverse">
-                  <Globe className="text-blue-500" size={20} />
-                  <span className="text-gray-700 dark:text-gray-300">{t('language')}</span>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant={language === 'ar' ? 'default' : 'outline'}
-                    onClick={() => updateLanguage('ar')}
-                  >
-                    {t('arabic')}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={language === 'en' ? 'default' : 'outline'}
-                    onClick={() => updateLanguage('en')}
-                  >
-                    {t('english')}
-                  </Button>
-                </div>
+            {/* Language Setting Only */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3 space-x-reverse">
+                <Globe className="text-blue-500" size={20} />
+                <span className="text-gray-700">{t('language')}</span>
               </div>
-
-              {/* Theme Setting */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3 space-x-reverse">
-                  {getThemeIcon()}
-                  <span className="text-gray-700 dark:text-gray-300">{t('theme')}</span>
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    size="sm"
-                    variant={theme === 'light' ? 'default' : 'outline'}
-                    onClick={() => updateTheme('light')}
-                  >
-                    <Sun size={14} />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={theme === 'dark' ? 'default' : 'outline'}
-                    onClick={() => updateTheme('dark')}
-                  >
-                    <Moon size={14} />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={theme === 'system' ? 'default' : 'outline'}
-                    onClick={() => updateTheme('system')}
-                  >
-                    <Monitor size={14} />
-                  </Button>
-                </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant={language === 'ar' ? 'default' : 'outline'}
+                  onClick={() => updateLanguage('ar')}
+                >
+                  {t('arabic')}
+                </Button>
+                <Button
+                  size="sm"
+                  variant={language === 'en' ? 'default' : 'outline'}
+                  onClick={() => updateLanguage('en')}
+                >
+                  {t('english')}
+                </Button>
               </div>
             </div>
           </CardContent>
