@@ -38,7 +38,18 @@ export const useStoreSettings = () => {
         return;
       }
 
-      setSettings(data);
+      if (data) {
+        setSettings(data);
+      } else {
+        // If no data exists, create default settings
+        const defaultSettings: StoreSettings = {
+          id: 'default',
+          store_name: 'متجر البرندات',
+          welcome_image: '/placeholder.svg',
+          admin_password: '01204486263'
+        };
+        setSettings(defaultSettings);
+      }
     } catch (error) {
       console.error('Error fetching store settings:', error);
       // Provide default settings on error
@@ -59,7 +70,8 @@ export const useStoreSettings = () => {
 
     try {
       // تحديث الحالة المحلية فوراً لتحسين الأداء
-      setSettings(prev => prev ? { ...prev, ...updates } : null);
+      const updatedSettings = { ...settings, ...updates };
+      setSettings(updatedSettings);
 
       const { data, error } = await supabase
         .from('store_settings')
@@ -70,7 +82,7 @@ export const useStoreSettings = () => {
 
       if (error) {
         // إذا فشل التحديث، أرجع للحالة السابقة
-        setSettings(prev => prev ? { ...prev, ...settings } : null);
+        setSettings(settings);
         throw error;
       }
 
@@ -83,7 +95,19 @@ export const useStoreSettings = () => {
   };
 
   const checkAdminPassword = (password: string): boolean => {
-    return settings?.admin_password === password;
+    console.log('Checking password:', password);
+    console.log('Stored password:', settings?.admin_password);
+    console.log('Password match:', settings?.admin_password === password);
+    
+    if (!settings) {
+      console.log('No settings found');
+      return false;
+    }
+    
+    // تأكد من أن كلمة المرور تتطابق تماماً
+    const isValid = settings.admin_password.trim() === password.trim();
+    console.log('Final validation result:', isValid);
+    return isValid;
   };
 
   return {
