@@ -13,52 +13,63 @@
   --theme-gradient-button: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
 }
 
-/* تطبيق التصميمات على العناصر الأساسية */
-body {
-  background-color: var(--theme-background) !important;
+/* تطبيق التصميمات على العناصر الأساسية بقوة أكبر */
+body,
+.min-h-screen {
+  background: var(--theme-background) !important;
   color: var(--theme-text) !important;
   transition: all 0.3s ease !important;
 }
 
-/* تطبيق التصميم على البطاقات */
+/* تطبيق التصميم على البطاقات والخلفيات البيضاء */
 .bg-white,
 .bg-gray-50,
-.bg-gray-100 {
-  background-color: var(--theme-surface) !important;
+.bg-gray-100,
+.theme-surface-bg {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text) !important;
 }
 
 /* تطبيق التصميم على الهيدر */
 .bg-gradient-to-r.from-purple-500.to-blue-600,
-.themed-header {
+.themed-header,
+.theme-gradient-header {
   background: var(--theme-gradient-header) !important;
+  color: white !important;
 }
 
 /* تطبيق التصميم على الأزرار */
 .bg-blue-500,
 .bg-green-500,
 .bg-purple-500,
-.themed-button {
+.themed-button,
+.theme-gradient-button {
   background: var(--theme-gradient-button) !important;
   color: white !important;
+  border: none !important;
 }
 
 .bg-blue-600:hover,
 .bg-green-600:hover,
 .bg-purple-600:hover,
-.themed-button:hover {
+.themed-button:hover,
+.theme-gradient-button:hover {
   background: var(--theme-gradient-button) !important;
   opacity: 0.9 !important;
+  color: white !important;
 }
 
 /* تطبيق التصميم على النصوص */
 .text-gray-900,
 .text-gray-800,
-.text-gray-700 {
+.text-gray-700,
+.theme-text {
   color: var(--theme-text) !important;
 }
 
 .text-gray-600,
-.text-gray-500 {
+.text-gray-500,
+.theme-text-secondary {
   color: var(--theme-text-secondary) !important;
 }
 
@@ -68,70 +79,20 @@ body {
   border-color: var(--theme-accent) !important;
 }
 
-/* كلاسات مساعدة للتصميمات */
-.theme-primary-bg {
-  background-color: var(--theme-primary) !important;
-}
-
-.theme-secondary-bg {
-  background-color: var(--theme-secondary) !important;
-}
-
+/* تطبيق التصميم على الخلفيات الملونة */
+.bg-blue-50,
+.bg-green-50,
+.bg-purple-50,
 .theme-accent-bg {
-  background-color: var(--theme-accent) !important;
-}
-
-.theme-surface-bg {
-  background-color: var(--theme-surface) !important;
-}
-
-.theme-background-bg {
-  background-color: var(--theme-background) !important;
-}
-
-.theme-primary-text {
-  color: var(--theme-primary) !important;
-}
-
-.theme-text {
+  background: var(--theme-accent) !important;
   color: var(--theme-text) !important;
 }
 
-.theme-text-secondary {
-  color: var(--theme-text-secondary) !important;
-}
-
-.theme-gradient-header {
-  background: var(--theme-gradient-header) !important;
-}
-
-.theme-gradient-card {
-  background: var(--theme-gradient-card) !important;
-}
-
-.theme-gradient-button {
-  background: var(--theme-gradient-button) !important;
-  color: white !important;
-}
-
-/* تطبيق التصميم على العناصر التفاعلية */
-.hover\:bg-blue-600:hover,
-.hover\:bg-green-600:hover,
-.hover\:bg-purple-600:hover {
-  background: var(--theme-gradient-button) !important;
-  opacity: 0.9 !important;
-}
-
-/* تطبيق التصميم على الأيقونات والعناصر المختارة */
-.bg-blue-50,
-.bg-green-50,
-.bg-purple-50 {
-  background-color: var(--theme-accent) !important;
-}
-
+/* تطبيق التصميم على النصوص الملونة */
 .text-blue-600,
 .text-green-600,
-.text-purple-600 {
+.text-purple-600,
+.theme-primary-text {
   color: var(--theme-primary) !important;
 }
 
@@ -148,8 +109,70 @@ body {
   font-weight: 600 !important;
 }
 
+/* تطبيق التصميم على الحدود الملونة */
 .border-blue-500,
 .border-green-500,
 .border-purple-500 {
   border-color: var(--theme-primary) !important;
+}
+
+/* كلاسات مساعدة للتصميمات */
+.theme-primary-bg {
+  background: var(--theme-primary) !important;
+  color: white !important;
+}
+
+.theme-secondary-bg {
+  background: var(--theme-secondary) !important;
+  color: white !important;
+}
+
+.theme-background-bg {
+  background: var(--theme-background) !important;
+  color: var(--theme-text) !important;
+}
+
+.theme-gradient-card {
+  background: var(--theme-gradient-card) !important;
+  color: var(--theme-text) !important;
+}
+
+/* تطبيق التصميم على التنبيهات والإشعارات */
+.bg-blue-100,
+.bg-green-100,
+.bg-purple-100 {
+  background: var(--theme-accent) !important;
+  color: var(--theme-text) !important;
+}
+
+/* تطبيق التصميم على الأزرار الثانوية */
+.bg-gray-200,
+.bg-gray-300 {
+  background: var(--theme-accent) !important;
+  color: var(--theme-text) !important;
+}
+
+/* تطبيق التصميم على المدخلات */
+.bg-gray-100 input,
+.bg-gray-50 input {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-accent) !important;
+}
+
+/* تطبيق التصميم على البطاقات المختارة */
+.border-blue-500.bg-blue-50 {
+  border-color: var(--theme-primary) !important;
+  background: var(--theme-accent) !important;
+  color: var(--theme-text) !important;
+}
+
+/* تطبيق التصميم على الأيقونات */
+.text-white {
+  color: white !important;
+}
+
+/* تأكد من تطبيق الألوان على جميع العناصر */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
 }

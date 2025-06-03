@@ -20,7 +20,7 @@ const ThemeWrapper = ({ children }: { children: React.ReactNode }) => {
       const theme = getThemeById(settings.theme_id);
       const root = document.documentElement;
       
-      console.log('Applying theme:', theme.name, 'with colors:', theme.colors);
+      console.log('تطبيق التصميم:', theme.name, 'مع الألوان:', theme.colors);
       
       // تطبيق متغيرات CSS المخصصة
       root.style.setProperty('--theme-primary', theme.colors.primary);
@@ -36,11 +36,14 @@ const ThemeWrapper = ({ children }: { children: React.ReactNode }) => {
       root.style.setProperty('--theme-gradient-card', theme.gradients.card);
       root.style.setProperty('--theme-gradient-button', theme.gradients.button);
       
-      // تطبيق التصميم على الصفحة فوراً
-      document.body.style.backgroundColor = theme.colors.background;
+      // تطبيق التصميم على body مباشرة
+      document.body.style.background = theme.colors.background;
       document.body.style.color = theme.colors.text;
       
-      console.log('Global theme applied successfully:', theme.name);
+      // إضافة كلاس للتطبيق لتطبيق التصميم
+      document.body.className = `theme-${theme.id}`;
+      
+      console.log('تم تطبيق التصميم بنجاح:', theme.name);
     }
   }, [settings?.theme_id, loading]);
 
