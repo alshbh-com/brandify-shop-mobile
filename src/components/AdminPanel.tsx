@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -61,6 +62,13 @@ const AdminPanel = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'welcome' | 'product' | 'category') => {
     const file = e.target.files?.[0];
     if (file) {
+      // التحقق من نوع الملف
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('يرجى اختيار ملف صورة صالح (JPEG, PNG, GIF, WebP, SVG)');
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (event) => {
         const result = event.target?.result as string;
@@ -226,7 +234,7 @@ const AdminPanel = () => {
                     تغيير الصورة
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/*,.svg"
                       onChange={(e) => handleImageUpload(e, 'welcome')}
                       className="hidden"
                     />
@@ -411,24 +419,38 @@ const AdminPanel = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-1">صورة المنتج</label>
+                  <label className="block text-sm font-medium mb-1">صورة المنتج (PNG, JPG, SVG)</label>
                   {productForm.image && (
-                    <img
-                      src={productForm.image}
-                      alt="Preview"
-                      className="w-full h-32 object-cover rounded-lg mb-2"
-                    />
+                    <div className="mb-2">
+                      {productForm.image.includes('data:image/svg+xml') ? (
+                        <div 
+                          className="w-full h-32 border rounded-lg flex items-center justify-center bg-gray-50"
+                          dangerouslySetInnerHTML={{ 
+                            __html: atob(productForm.image.split(',')[1]) 
+                          }}
+                        />
+                      ) : (
+                        <img
+                          src={productForm.image}
+                          alt="Preview"
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                      )}
+                    </div>
                   )}
                   <label className="flex items-center justify-center gap-2 bg-gray-100 border border-gray-300 py-2 px-4 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors">
                     <Upload size={16} />
-                    رفع صورة
+                    رفع صورة (PNG, JPG, SVG)
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,image/svg+xml,.svg"
                       onChange={(e) => handleImageUpload(e, 'product')}
                       className="hidden"
                     />
                   </label>
+                  <p className="text-xs text-gray-500 mt-1">
+                    أنواع الملفات المدعومة: PNG, JPG, GIF, WebP, SVG
+                  </p>
                 </div>
                 
                 <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600">
@@ -474,24 +496,38 @@ const AdminPanel = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-1">صورة القسم</label>
+                  <label className="block text-sm font-medium mb-1">صورة القسم (PNG, JPG, SVG)</label>
                   {categoryForm.image && (
-                    <img
-                      src={categoryForm.image}
-                      alt="Preview"
-                      className="w-full h-32 object-cover rounded-lg mb-2"
-                    />
+                    <div className="mb-2">
+                      {categoryForm.image.includes('data:image/svg+xml') ? (
+                        <div 
+                          className="w-full h-32 border rounded-lg flex items-center justify-center bg-gray-50"
+                          dangerouslySetInnerHTML={{ 
+                            __html: atob(categoryForm.image.split(',')[1]) 
+                          }}
+                        />
+                      ) : (
+                        <img
+                          src={categoryForm.image}
+                          alt="Preview"
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                      )}
+                    </div>
                   )}
                   <label className="flex items-center justify-center gap-2 bg-gray-100 border border-gray-300 py-2 px-4 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors">
                     <Upload size={16} />
-                    رفع صورة
+                    رفع صورة (PNG, JPG, SVG)
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,image/svg+xml,.svg"
                       onChange={(e) => handleImageUpload(e, 'category')}
                       className="hidden"
                     />
                   </label>
+                  <p className="text-xs text-gray-500 mt-1">
+                    أنواع الملفات المدعومة: PNG, JPG, GIF, WebP, SVG
+                  </p>
                 </div>
                 
                 <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600">
