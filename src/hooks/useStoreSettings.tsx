@@ -32,7 +32,7 @@ export const useStoreSettings = () => {
           id: 'default',
           store_name: 'متجر البرندات',
           welcome_image: '/placeholder.svg',
-          admin_password: '01278006248'
+          admin_password: '01204486263'
         };
         setSettings(defaultSettings);
         return;
@@ -46,7 +46,7 @@ export const useStoreSettings = () => {
         id: 'default',
         store_name: 'متجر البرندات',
         welcome_image: '/placeholder.svg',
-        admin_password: '01278006248'
+        admin_password: '01204486263'
       };
       setSettings(defaultSettings);
     } finally {
@@ -58,6 +58,9 @@ export const useStoreSettings = () => {
     if (!settings) return;
 
     try {
+      // تحديث الحالة المحلية فوراً لتحسين الأداء
+      setSettings(prev => prev ? { ...prev, ...updates } : null);
+
       const { data, error } = await supabase
         .from('store_settings')
         .update(updates)
@@ -65,7 +68,11 @@ export const useStoreSettings = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // إذا فشل التحديث، أرجع للحالة السابقة
+        setSettings(prev => prev ? { ...prev, ...settings } : null);
+        throw error;
+      }
 
       setSettings(data);
       return data;

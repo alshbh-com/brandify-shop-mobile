@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ const AdminPanel = () => {
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [editingCategory, setEditingCategory] = useState<any>(null);
+  const [localStoreName, setLocalStoreName] = useState('');
 
   const [productForm, setProductForm] = useState({
     name: '',
@@ -40,6 +41,22 @@ const AdminPanel = () => {
     deleteCategory,
     adminLogout
   } = useApp();
+
+  // تحديث اسم المتجر المحلي عند تغيير اسم المتجر الرئيسي
+  useEffect(() => {
+    setLocalStoreName(storeName);
+  }, [storeName]);
+
+  // استخدام debouncing لتحديث اسم المتجر
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localStoreName !== storeName && localStoreName.trim() !== '') {
+        updateStoreName(localStoreName);
+      }
+    }, 500); // انتظار 500ms قبل التحديث
+
+    return () => clearTimeout(timer);
+  }, [localStoreName, storeName, updateStoreName]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'welcome' | 'product' | 'category') => {
     const file = e.target.files?.[0];
@@ -184,8 +201,8 @@ const AdminPanel = () => {
               <CardContent>
                 <div className="flex gap-3">
                   <Input
-                    value={storeName}
-                    onChange={(e) => updateStoreName(e.target.value)}
+                    value={localStoreName}
+                    onChange={(e) => setLocalStoreName(e.target.value)}
                     placeholder="اسم المتجر"
                     className="flex-1"
                   />
