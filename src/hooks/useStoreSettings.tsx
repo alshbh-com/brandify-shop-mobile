@@ -7,6 +7,7 @@ interface StoreSettings {
   store_name: string;
   welcome_image: string;
   admin_password: string;
+  theme_id: number;
 }
 
 export const useStoreSettings = () => {
@@ -32,7 +33,8 @@ export const useStoreSettings = () => {
           id: 'default',
           store_name: 'متجر البرندات',
           welcome_image: '/placeholder.svg',
-          admin_password: '01204486263'
+          admin_password: '01204486263',
+          theme_id: 1
         };
         setSettings(defaultSettings);
         return;
@@ -46,7 +48,8 @@ export const useStoreSettings = () => {
           id: 'default',
           store_name: 'متجر البرندات',
           welcome_image: '/placeholder.svg',
-          admin_password: '01204486263'
+          admin_password: '01204486263',
+          theme_id: 1
         };
         setSettings(defaultSettings);
       }
@@ -57,7 +60,8 @@ export const useStoreSettings = () => {
         id: 'default',
         store_name: 'متجر البرندات',
         welcome_image: '/placeholder.svg',
-        admin_password: '01204486263'
+        admin_password: '01204486263',
+        theme_id: 1
       };
       setSettings(defaultSettings);
     } finally {

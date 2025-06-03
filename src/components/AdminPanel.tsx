@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/contexts/AppContext';
 import { Plus, Edit, Trash2, Upload, X } from 'lucide-react';
+import ThemeManager from './ThemeManager';
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState('store');
@@ -180,6 +180,7 @@ const AdminPanel = () => {
         <div className="flex space-x-4 space-x-reverse">
           {[
             { id: 'store', label: 'إعدادات المتجر' },
+            { id: 'themes', label: 'التصميمات' },
             { id: 'products', label: 'المنتجات' },
             { id: 'categories', label: 'الأقسام' }
           ].map(tab => (
@@ -242,6 +243,13 @@ const AdminPanel = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        )}
+
+        {/* Themes Tab */}
+        {activeTab === 'themes' && (
+          <div className="space-y-6">
+            <ThemeManager />
           </div>
         )}
 

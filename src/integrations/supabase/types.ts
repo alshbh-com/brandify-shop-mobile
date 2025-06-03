@@ -107,6 +107,7 @@ export type Database = {
           created_at: string | null
           id: string
           store_name: string
+          theme_id: number | null
           updated_at: string | null
           welcome_image: string | null
         }
@@ -115,6 +116,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           store_name?: string
+          theme_id?: number | null
           updated_at?: string | null
           welcome_image?: string | null
         }
@@ -123,6 +125,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           store_name?: string
+          theme_id?: number | null
           updated_at?: string | null
           welcome_image?: string | null
         }
