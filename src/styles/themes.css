@@ -24,6 +24,7 @@
 
 .theme-button {
   background: var(--theme-gradient-button) !important;
+  color: white !important;
 }
 
 .theme-primary {
@@ -48,18 +49,43 @@
 
 /* تصميمات مخصصة للتطبيق على العناصر */
 .themed-gradient-bg {
-  background: var(--theme-gradient-header);
+  background: var(--theme-gradient-header) !important;
 }
 
 .themed-card-bg {
-  background: var(--theme-gradient-card);
+  background: var(--theme-gradient-card) !important;
 }
 
 .themed-button {
-  background: var(--theme-gradient-button);
-  color: white;
+  background: var(--theme-gradient-button) !important;
+  color: white !important;
 }
 
 .themed-button:hover {
-  opacity: 0.9;
+  opacity: 0.9 !important;
+}
+
+/* تطبيق التصميم على العناصر الرئيسية */
+body {
+  background-color: var(--theme-background) !important;
+  color: var(--theme-text) !important;
+}
+
+/* تطبيق التصميم على الهيدر */
+.bg-gradient-to-r.from-purple-500.to-blue-600 {
+  background: var(--theme-gradient-header) !important;
+}
+
+/* تطبيق التصميم على البطاقات */
+.bg-white {
+  background-color: var(--theme-surface) !important;
+}
+
+/* تطبيق التصميم على الأزرار */
+.bg-blue-500 {
+  background: var(--theme-gradient-button) !important;
+}
+
+.bg-green-500 {
+  background: var(--theme-gradient-button) !important;
 }

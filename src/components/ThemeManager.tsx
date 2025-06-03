@@ -2,11 +2,40 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useThemes } from '@/hooks/useThemes';
+import { useStoreSettings } from '@/hooks/useStoreSettings';
+import { themes, getThemeById } from '@/data/themes';
 import { Check, Palette } from 'lucide-react';
 
 const ThemeManager = () => {
-  const { themes, currentTheme, changeTheme } = useThemes();
+  const { settings, updateSettings } = useStoreSettings();
+  const currentThemeId = settings?.theme_id || 1;
+  const currentTheme = getThemeById(currentThemeId);
+
+  const changeTheme = async (themeId: number) => {
+    try {
+      console.log('Changing theme to:', themeId);
+      await updateSettings({ theme_id: themeId });
+      
+      // تطبيق التصميم فوراً
+      const newTheme = getThemeById(themeId);
+      const root = document.documentElement;
+      
+      root.style.setProperty('--theme-primary', newTheme.colors.primary);
+      root.style.setProperty('--theme-secondary', newTheme.colors.secondary);
+      root.style.setProperty('--theme-accent', newTheme.colors.accent);
+      root.style.setProperty('--theme-background', newTheme.colors.background);
+      root.style.setProperty('--theme-surface', newTheme.colors.surface);
+      root.style.setProperty('--theme-text', newTheme.colors.text);
+      root.style.setProperty('--theme-text-secondary', newTheme.colors.textSecondary);
+      root.style.setProperty('--theme-gradient-header', newTheme.gradients.header);
+      root.style.setProperty('--theme-gradient-card', newTheme.gradients.card);
+      root.style.setProperty('--theme-gradient-button', newTheme.gradients.button);
+      
+      console.log('Theme applied successfully:', newTheme.name);
+    } catch (error) {
+      console.error('Error updating theme:', error);
+    }
+  };
 
   return (
     <Card>
@@ -22,13 +51,13 @@ const ThemeManager = () => {
             <div
               key={theme.id}
               className={`relative border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                currentTheme.id === theme.id
+                currentThemeId === theme.id
                   ? 'border-blue-500 bg-blue-50'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
               onClick={() => changeTheme(theme.id)}
             >
-              {currentTheme.id === theme.id && (
+              {currentThemeId === theme.id && (
                 <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1">
                   <Check size={12} />
                 </div>
@@ -64,7 +93,7 @@ const ThemeManager = () => {
                 />
                 
                 <Button
-                  variant={currentTheme.id === theme.id ? "default" : "outline"}
+                  variant={currentThemeId === theme.id ? "default" : "outline"}
                   size="sm"
                   className="w-full"
                   onClick={(e) => {
@@ -72,7 +101,7 @@ const ThemeManager = () => {
                     changeTheme(theme.id);
                   }}
                 >
-                  {currentTheme.id === theme.id ? 'مُطبق حالياً' : 'تطبيق التصميم'}
+                  {currentThemeId === theme.id ? 'مُطبق حالياً' : 'تطبيق التصميم'}
                 </Button>
               </div>
             </div>

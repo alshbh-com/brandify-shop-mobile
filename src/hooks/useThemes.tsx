@@ -1,10 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { useApp } from '@/contexts/AppContext';
+import { useStoreSettings } from '@/hooks/useStoreSettings';
 import { themes, getThemeById, Theme } from '@/data/themes';
 
 export const useThemes = () => {
-  const { settings, updateSettings } = useApp();
+  const { settings, updateSettings } = useStoreSettings();
   const [currentTheme, setCurrentTheme] = useState<Theme>(themes[0]);
 
   useEffect(() => {
@@ -31,10 +31,13 @@ export const useThemes = () => {
     root.style.setProperty('--theme-gradient-header', theme.gradients.header);
     root.style.setProperty('--theme-gradient-card', theme.gradients.card);
     root.style.setProperty('--theme-gradient-button', theme.gradients.button);
+    
+    console.log('Theme applied:', theme.name);
   };
 
   const changeTheme = async (themeId: number) => {
     try {
+      console.log('Changing theme to:', themeId);
       await updateSettings({ theme_id: themeId });
       const newTheme = getThemeById(themeId);
       setCurrentTheme(newTheme);
