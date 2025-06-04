@@ -13,10 +13,11 @@ const ThemeManager = () => {
 
   const applyThemeImmediately = (theme: any) => {
     const root = document.documentElement;
+    const body = document.body;
     
     console.log('تطبيق التصميم فوراً:', theme.name);
     
-    // تطبيق متغيرات CSS المخصصة
+    // تطبيق متغيرات CSS المخصصة بقوة
     root.style.setProperty('--theme-primary', theme.colors.primary);
     root.style.setProperty('--theme-secondary', theme.colors.secondary);
     root.style.setProperty('--theme-accent', theme.colors.accent);
@@ -30,14 +31,50 @@ const ThemeManager = () => {
     root.style.setProperty('--theme-gradient-card', theme.gradients.card);
     root.style.setProperty('--theme-gradient-button', theme.gradients.button);
     
-    // تطبيق التصميم على body مباشرة
-    document.body.style.background = theme.colors.background;
-    document.body.style.color = theme.colors.text;
+    // تطبيق التصميم على العناصر الأساسية مباشرة
+    body.style.setProperty('background', theme.colors.background, 'important');
+    body.style.setProperty('color', theme.colors.text, 'important');
+    root.style.setProperty('background', theme.colors.background, 'important');
+    root.style.setProperty('color', theme.colors.text, 'important');
     
     // إضافة كلاس للتطبيق
-    document.body.className = `theme-${theme.id}`;
+    body.className = `theme-${theme.id}`;
     
-    console.log('تم تطبيق التصميم على المستند:', theme.name);
+    // تطبيق التصميم على جميع العناصر الموجودة
+    const allElements = document.querySelectorAll('*');
+    allElements.forEach(element => {
+      const htmlElement = element as HTMLElement;
+      
+      // تطبيق التصميم على البطاقات والخلفيات
+      if (htmlElement.classList.contains('bg-white') || 
+          htmlElement.classList.contains('bg-gray-50') || 
+          htmlElement.classList.contains('bg-gray-100')) {
+        htmlElement.style.setProperty('background', theme.colors.surface, 'important');
+        htmlElement.style.setProperty('color', theme.colors.text, 'important');
+      }
+      
+      // تطبيق التصميم على الأزرار
+      if (htmlElement.tagName === 'BUTTON' || htmlElement.getAttribute('role') === 'button') {
+        htmlElement.style.setProperty('background', theme.gradients.button, 'important');
+        htmlElement.style.setProperty('color', 'white', 'important');
+      }
+      
+      // تطبيق التصميم على النصوص
+      if (htmlElement.classList.contains('text-gray-900') || 
+          htmlElement.classList.contains('text-gray-800') || 
+          htmlElement.classList.contains('text-gray-700')) {
+        htmlElement.style.setProperty('color', theme.colors.text, 'important');
+      }
+    });
+    
+    // إجبار إعادة رسم الصفحة
+    setTimeout(() => {
+      document.body.style.display = 'none';
+      document.body.offsetHeight; // trigger reflow
+      document.body.style.display = '';
+    }, 50);
+    
+    console.log('تم تطبيق التصميم بقوة على كامل التطبيق:', theme.name);
   };
 
   const changeTheme = async (themeId: number) => {
@@ -51,12 +88,24 @@ const ThemeManager = () => {
       // حفظ التصميم في قاعدة البيانات
       await updateSettings({ theme_id: themeId });
       
+      // تطبيق التصميم مرة أخرى للتأكد
+      setTimeout(() => {
+        applyThemeImmediately(newTheme);
+      }, 200);
+      
       console.log('تم تطبيق وحفظ التصميم بنجاح:', newTheme.name);
       
     } catch (error) {
       console.error('خطأ في تحديث التصميم:', error);
     }
   };
+
+  // تطبيق التصميم الحالي عند تحميل المكون
+  useEffect(() => {
+    if (currentTheme) {
+      applyThemeImmediately(currentTheme);
+    }
+  }, [currentTheme]);
 
   return (
     <Card className="theme-surface-bg">
