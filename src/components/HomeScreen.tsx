@@ -1,10 +1,14 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { useApp } from '@/contexts/AppContext';
-import { Plus, Search, ShoppingBag } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
+import StoreHeader from './StoreHeader';
+import OffersSection from './OffersSection';
+import CategoryFilter from './CategoryFilter';
+import ProductGrid from './ProductGrid';
 
 const HomeScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -15,10 +19,8 @@ const HomeScreen = () => {
   const { 
     products, 
     categories, 
-    addToCart, 
     storeName, 
-    adminLogin,
-    isAdmin 
+    adminLogin
   } = useApp();
 
   const getCategoryName = (categoryId: string) => {
@@ -42,145 +44,85 @@ const HomeScreen = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 pb-20">
-      {/* Header with Logo */}
-      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 text-white shadow-2xl">
-        <div className="px-6 pt-8 pb-6">
-          {/* Store Logo and Name */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-3 space-x-reverse">
-              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                <ShoppingBag className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white">{storeName}</h1>
-                <p className="text-blue-100 text-sm">أفضل الأسعار والجودة</p>
-              </div>
-            </div>
-            <Button
-              onClick={() => setShowAdminLogin(true)}
-              variant="ghost"
-              size="sm"
-              className="text-white/80 hover:text-white hover:bg-white/10 rounded-full px-4"
-            >
-              إدارة
-            </Button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50 pb-20">
+      {/* Header الجديد */}
+      <StoreHeader
+        storeName={storeName}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onAdminClick={() => setShowAdminLogin(true)}
+      />
+
+      {/* قسم العروض المميزة */}
+      <OffersSection />
+
+      {/* فاصل مرئي */}
+      <div className="px-6">
+        <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+      </div>
+
+      {/* فلتر الأقسام */}
+      <CategoryFilter
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        productsCount={filteredProducts.length}
+      />
+
+      {/* شبكة المنتجات */}
+      <div className="px-6 pb-8">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              جميع المنتجات
+            </h2>
           </div>
-          
-          {/* Enhanced Search Bar */}
-          <div className="relative">
-            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400">
-              <Search size={20} />
-            </div>
-            <Input
-              placeholder="ابحث عن المنتجات..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pr-12 pl-4 py-3 bg-white/95 backdrop-blur-sm border-0 text-gray-800 rounded-2xl shadow-lg focus:ring-2 focus:ring-white/30 transition-all duration-300"
-            />
+          <div className="text-sm text-gray-500">
+            {filteredProducts.length} من أصل {products.length} منتج
           </div>
         </div>
+        
+        {filteredProducts.length > 0 ? (
+          <ProductGrid
+            products={filteredProducts}
+            getCategoryName={getCategoryName}
+          />
+        ) : (
+          <div className="text-center py-16">
+            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ShoppingBag className="w-12 h-12 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">لا توجد منتجات</h3>
+            <p className="text-gray-500">جرب البحث بكلمات مختلفة أو اختر قسم آخر</p>
+          </div>
+        )}
       </div>
 
-      {/* Enhanced Categories */}
-      <div className="px-6 py-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-          <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full ml-3"></div>
-          الأقسام
-        </h2>
-        <div className="flex gap-3 overflow-x-auto pb-2">
-          <button
-            onClick={() => setSelectedCategory('all')}
-            className={`px-6 py-3 rounded-2xl whitespace-nowrap text-sm font-medium transition-all duration-300 shadow-lg ${
-              selectedCategory === 'all'
-                ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-blue-200 transform scale-105'
-                : 'bg-white text-gray-600 border border-gray-100 hover:shadow-md hover:scale-105'
-            }`}
-          >
-            الكل
-          </button>
-          {categories.map(category => (
-            <button
-              key={category.id}
-              onClick={() => setSelectedCategory(category.id)}
-              className={`px-6 py-3 rounded-2xl whitespace-nowrap text-sm font-medium transition-all duration-300 shadow-lg ${
-                selectedCategory === category.id
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-blue-200 transform scale-105'
-                  : 'bg-white text-gray-600 border border-gray-100 hover:shadow-md hover:scale-105'
-              }`}
-            >
-              {category.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Enhanced Products Grid */}
-      <div className="px-6 pb-4">
-        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-          <div className="w-1 h-6 bg-gradient-to-b from-purple-500 to-blue-500 rounded-full ml-3"></div>
-          المنتجات
-        </h2>
-        <div className="grid grid-cols-2 gap-4">
-          {filteredProducts.map(product => (
-            <Card key={product.id} className="bg-white shadow-xl border-0 overflow-hidden rounded-3xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-              <div className="aspect-square relative overflow-hidden">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-              </div>
-              <CardContent className="p-4">
-                <h3 className="font-bold text-gray-800 text-sm mb-1 line-clamp-2">
-                  {product.name}
-                </h3>
-                <p className="text-xs text-purple-500 font-medium mb-3">
-                  {getCategoryName(product.category_id)}
-                </p>
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                      {product.price} ر.س
-                    </span>
-                  </div>
-                  <Button
-                    onClick={() => addToCart(product)}
-                    size="sm"
-                    className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-full w-10 h-10 p-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
-                  >
-                    <Plus size={16} />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* Enhanced Admin Login Modal */}
+      {/* نافذة دخول الإدارة */}
       {showAdminLogin && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-sm bg-white rounded-3xl shadow-2xl">
-            <CardContent className="p-8">
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <ShoppingBag className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-800">دخول الإدارة</h3>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-sm bg-white rounded-3xl shadow-2xl border-0 overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 text-center">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ShoppingBag className="w-8 h-8 text-white" />
               </div>
+              <h3 className="text-xl font-bold text-white">دخول الإدارة</h3>
+              <p className="text-purple-100 text-sm mt-1">أدخل كلمة المرور للوصول لوحة التحكم</p>
+            </div>
+            <CardContent className="p-6">
               <Input
                 type="password"
                 placeholder="كلمة المرور"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
-                className="mb-6 rounded-2xl border-gray-200 focus:ring-2 focus:ring-blue-500"
+                className="mb-6 rounded-2xl border-gray-200 focus:ring-2 focus:ring-purple-500 py-3"
+                onKeyPress={(e) => e.key === 'Enter' && handleAdminLogin()}
               />
               <div className="flex gap-3">
                 <Button
                   onClick={handleAdminLogin}
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-2xl shadow-lg"
+                  className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-2xl shadow-lg py-3 font-semibold"
                 >
                   دخول
                 </Button>
@@ -190,7 +132,7 @@ const HomeScreen = () => {
                     setAdminPassword('');
                   }}
                   variant="outline"
-                  className="flex-1 rounded-2xl border-gray-200 hover:bg-gray-50"
+                  className="flex-1 rounded-2xl border-gray-200 hover:bg-gray-50 py-3"
                 >
                   إلغاء
                 </Button>

@@ -15,7 +15,7 @@
 
 /* تطبيق التصميم على جميع العناصر الأساسية */
 * {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+  transition: all 0.3s ease !important;
 }
 
 html,
@@ -24,6 +24,33 @@ body,
 .min-h-screen {
   background: var(--theme-background) !important;
   color: var(--theme-text) !important;
+}
+
+/* إخفاء شريط التمرير للعناصر الأفقية */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* تأثيرات الحركة للبطاقات */
+.group:hover .group-hover\:scale-110 {
+  transform: scale(1.1);
+}
+
+.group:hover .group-hover\:opacity-100 {
+  opacity: 1;
+}
+
+.group:hover .group-hover\:text-blue-600 {
+  color: #2563eb;
+}
+
+.group:hover .group-hover\:animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /* تطبيق التصميم على البطاقات والخلفيات */
@@ -67,20 +94,6 @@ button[class*="bg-indigo"],
   background: var(--theme-gradient-button) !important;
   color: white !important;
   border: none !important;
-}
-
-.bg-blue-500:hover,
-.bg-blue-600:hover,
-.bg-green-500:hover,
-.bg-green-600:hover,
-.bg-purple-500:hover,
-.bg-purple-600:hover,
-.bg-indigo-500:hover,
-.bg-indigo-600:hover,
-button:hover {
-  background: var(--theme-gradient-button) !important;
-  opacity: 0.9 !important;
-  color: white !important;
 }
 
 /* تطبيق التصميم على جميع النصوص */
@@ -144,44 +157,6 @@ select:focus {
   border-color: var(--theme-primary) !important;
 }
 
-/* تطبيق التصميم على البطاقات */
-.card,
-[class*="card"] {
-  background: var(--theme-surface) !important;
-  color: var(--theme-text) !important;
-  border-color: var(--theme-accent) !important;
-}
-
-/* تطبيق التصميم على التنبيهات */
-.bg-blue-100,
-.bg-green-100,
-.bg-purple-100,
-.bg-yellow-100,
-.bg-red-100 {
-  background: var(--theme-accent) !important;
-  color: var(--theme-text) !important;
-}
-
-/* تطبيق التصميم على القوائم */
-.menu,
-.dropdown,
-[role="menu"],
-[role="menuitem"] {
-  background: var(--theme-surface) !important;
-  color: var(--theme-text) !important;
-}
-
-/* تطبيق التصميم على الأيقونات */
-.text-white {
-  color: white !important;
-}
-
-/* تطبيق التصميم على الصور والخلفيات */
-.bg-cover,
-.bg-center {
-  background-color: var(--theme-surface) !important;
-}
-
 /* كلاسات مساعدة للتصميمات */
 .theme-primary-bg {
   background: var(--theme-primary) !important;
@@ -233,6 +208,67 @@ select:focus {
 .theme-gradient-button {
   background: var(--theme-gradient-button) !important;
   color: white !important;
+}
+
+/* تحسينات إضافية للتصميم الجديد */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* تأثيرات الحركة الجديدة */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.4s ease-out forwards;
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 640px) {
+  .grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+
+/* تحسينات للشاشات المتوسطة */
+@media (min-width: 1024px) {
+  .lg\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* تحسينات للشاشات الكبيرة */
+@media (min-width: 1280px) {
+  .xl\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 /* تطبيق قوي للتصميم على التطبيق بالكامل */
