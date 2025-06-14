@@ -6,24 +6,16 @@ import { Input } from '@/components/ui/input';
 import { useApp } from '@/contexts/AppContext';
 import { useSettingsContext } from '@/contexts/SettingsContext';
 import { useCoupons } from '@/hooks/useCoupons';
+import { useMerchants } from '@/hooks/useMerchants';
 import { Minus, Plus, Trash2, ShoppingBag, Tag } from 'lucide-react';
 
 const CartScreen = () => {
-  const { cart, removeFromCart, clearCart } = useApp();
+  const { cart, removeFromCart, updateCartQuantity, clearCart } = useApp();
   const { t } = useSettingsContext();
   const { coupons } = useCoupons();
+  const { getMerchantById } = useMerchants();
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
-
-  // Local function to update quantity
-  const updateQuantity = (productId: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      removeFromCart(productId);
-      return;
-    }
-    // For now, we'll handle this locally until we fix the context
-    // You may need to implement this in the AppContext
-  };
 
   const subtotal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   const discount = appliedCoupon ? (subtotal * appliedCoupon.discount_percent / 100) : 0;
@@ -49,6 +41,65 @@ const CartScreen = () => {
   const removeCoupon = () => {
     setAppliedCoupon(null);
     setCouponCode('');
+  };
+
+  const handleCheckout = () => {
+    if (cart.length === 0) return;
+
+    // تجميع المنتجات حسب التاجر
+    const productsByMerchant = cart.reduce((acc, item) => {
+      const merchantId = item.product.merchant_id || 'unknown';
+      if (!acc[merchantId]) {
+        acc[merchantId] = [];
+      }
+      acc[merchantId].push(item);
+      return acc;
+    }, {} as Record<string, typeof cart>);
+
+    // إرسال رسالة واتساب لكل تاجر
+    Object.entries(productsByMerchant).forEach(([merchantId, items]) => {
+      const merchant = getMerchantById(merchantId);
+      
+      if (!merchant?.whatsapp_number) {
+        alert(`لا يمكن العثور على رقم واتساب التاجر للمنتج: ${items[0].product.name}`);
+        return;
+      }
+
+      // إنشاء رسالة الطلب
+      let message = `مرحباً، أريد طلب المنتجات التالية:\n\n`;
+      let merchantTotal = 0;
+
+      items.forEach(item => {
+        const itemTotal = item.product.price * item.quantity;
+        merchantTotal += itemTotal;
+        message += `• ${item.product.name}\n`;
+        message += `  الكمية: ${item.quantity}\n`;
+        message += `  السعر: ${item.product.price} ريال\n`;
+        message += `  المجموع: ${itemTotal} ريال\n\n`;
+      });
+
+      // إضافة الخصم إذا وُجد
+      if (appliedCoupon && Object.keys(productsByMerchant).length === 1) {
+        const discountAmount = merchantTotal * appliedCoupon.discount_percent / 100;
+        message += `الخصم (${appliedCoupon.discount_percent}%): -${discountAmount.toFixed(2)} ريال\n`;
+        merchantTotal -= discountAmount;
+      }
+
+      message += `المجموع الكلي: ${merchantTotal.toFixed(2)} ريال\n\n`;
+      message += `شكراً لكم 🌹`;
+
+      // إنشاء رابط واتساب
+      const whatsappUrl = `https://wa.me/${merchant.whatsapp_number.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+      
+      // فتح واتساب
+      window.open(whatsappUrl, '_blank');
+    });
+
+    // مسح السلة بعد إتمام الطلب
+    setTimeout(() => {
+      clearCart();
+      alert('تم إرسال طلبك إلى التاجر عبر واتساب!');
+    }, 1000);
   };
 
   if (cart.length === 0) {
@@ -85,7 +136,7 @@ const CartScreen = () => {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                    onClick={() => updateCartQuantity(item.product.id, item.quantity - 1)}
                     disabled={item.quantity <= 1}
                   >
                     <Minus size={16} />
@@ -94,7 +145,7 @@ const CartScreen = () => {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                    onClick={() => updateCartQuantity(item.product.id, item.quantity + 1)}
                   >
                     <Plus size={16} />
                   </Button>
@@ -164,8 +215,11 @@ const CartScreen = () => {
               </div>
             </div>
             <div className="mt-6 space-y-3">
-              <Button className="w-full bg-blue-500 hover:bg-blue-600">
-                {t('proceedToCheckout')}
+              <Button 
+                className="w-full bg-green-500 hover:bg-green-600"
+                onClick={handleCheckout}
+              >
+                إكمال الطلب عبر واتساب
               </Button>
               <Button
                 variant="outline"
