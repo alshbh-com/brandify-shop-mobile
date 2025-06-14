@@ -16,7 +16,7 @@ const CartScreen = () => {
   });
   const [couponCode, setCouponCode] = useState("");
   const [couponError, setCouponError] = useState<string | null>(null);
-  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [appliedOffer, setAppliedOffer] = useState<any>(null);
   const [discount, setDiscount] = useState(0);
 
   const { 
@@ -27,54 +27,80 @@ const CartScreen = () => {
     user 
   } = useApp();
 
+  // Helper for finding offer by code (simulate coupon with offer)
   const handleApplyCoupon = async () => {
     setCouponError(null);
-    setAppliedCoupon(null);
+    setAppliedOffer(null);
     setDiscount(0);
 
     if (!couponCode.trim()) {
       setCouponError("الرجاء إدخال كود الكوبون");
       return;
     }
-    // (في التطبيق الواقعي: يجب جلب الكوبون من قاعدة البيانات والتحقق منه)
-    const { data: coupons } = await supabase
-      .from("coupons")
+
+    // Find active offer with "code" (simulate code as offer id or name/alt key)
+    // We'll use the offer's id as the code for simplicity, or you may use `name`
+    // Example: User enters the offer id OR offer code is stored in name field.
+    const typedCode = couponCode.trim();
+    // Try to find offer by id, or by name/code if stored there
+    let { data: offers, error } = await supabase
+      .from("offers")
       .select("*")
-      .eq("code", couponCode.trim().toUpperCase());
-    const coupon = (coupons && coupons[0]) ? coupons[0] : null;
-    if (!coupon) {
+      .or(`id.eq.${typedCode},name.ilike.%${typedCode}%`);
+    
+    if (!offers || offers.length === 0) {
       setCouponError("الكوبون غير صالح");
       return;
     }
-    // تحقق من الصلاحية والتاريخ وعدد الاستخدام, ...الخ
+    // Filter more: is active and within date range
     const now = new Date();
-    if (new Date(coupon.start_date) > now || new Date(coupon.end_date) < now) {
+    const foundOffer = offers.find((offer: any) => {
+      const start = new Date(offer.start_date);
+      const end = new Date(offer.end_date);
+      return offer.is_active && start <= now && end >= now;
+    });
+    if (!foundOffer) {
       setCouponError("الكوبون غير صالح أو منتهي");
       return;
     }
-    // تحقق من عدد مرات الاستخدام (لكل عميل)
-    const { data: used } = await supabase
-      .from("coupon_usages")
-      .select("id")
-      .eq("coupon_id", coupon.id)
-      .eq("user_id", supabase.auth?.user()?.id);
-    if (used && used.length >= coupon.max_usage) {
-      setCouponError("لقد استخدمت الكوبون الحد الأقصى المسموح");
+
+    // Optional: Only allow offer to apply if cart contains its product_id (for product-specific offers)
+    if (foundOffer.product_id) {
+      const cartProductIds = cart.map((item: any) => item.product.id);
+      if (!cartProductIds.includes(foundOffer.product_id)) {
+        setCouponError("هذا الكوبون خاص بمنتج غير موجود في السلة");
+        return;
+      }
+    }
+
+    // (Optional) Check for coupon usage by this user
+    if (!user?.id) {
+      setCouponError("يجب تسجيل الدخول لتفعيل الكوبون");
       return;
     }
-    // إذا وصلنا هنا فالكوبون صالح
-    setAppliedCoupon(coupon);
-    setDiscount(coupon.discount_percent);
-    setCouponError(null);
+    // Only check for this offer, since we're using Offer table as coupon
+    const { data: usageData, error: usageError } = await supabase
+      .from("coupon_usages")
+      .select("id")
+      .eq("coupon_id", foundOffer.id)
+      .eq("user_id", user.id);
 
-    // عند إتمام الطلب (عند عملية الدفع) سجل الاستخدام
-    // await supabase.from("coupon_usages").insert([{ coupon_id: coupon.id, user_id: supabase.auth.user().id }]);
+    // Could add max usage limit later per offer if needed, not available on offer table
+    if (usageData && usageData.length > 0) {
+      setCouponError("لقد استخدمت هذا الكوبون من قبل");
+      return;
+    }
+
+    // If all checks pass, apply coupon (offer)
+    setAppliedOffer(foundOffer);
+    setDiscount(foundOffer.discount_percentage);
+    setCouponError(null);
   };
 
   const total = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   const discountedTotal = discount > 0 ? total * (1 - discount / 100) : total;
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (cart.length === 0) {
       alert('السلة فارغة');
       return;
@@ -98,10 +124,19 @@ const CartScreen = () => {
 🛒 المنتجات:
 ${cartItems}
 
-💰 المجموع الكلي: ${total} ج.م
+💰 المجموع الكلي: ${discount > 0 ? discountedTotal : total} ج.م
 
+${discount > 0 && appliedOffer ? `🎟️ استخدم كوبون (${couponCode}): خصم ${appliedOffer.discount_percentage}%\n` : ""}
 📝 ملاحظات: ${orderInfo.notes || 'لا توجد ملاحظات'}
     `;
+
+    // سجل استخدام الكوبون ان وجد
+    if (appliedOffer && user?.id) {
+      await supabase.from("coupon_usages").insert([{
+        coupon_id: appliedOffer.id,
+        user_id: user.id
+      }]);
+    }
 
     // رقم الواتساب الجديد 
     const phoneNumber = '201204486263';
@@ -113,6 +148,10 @@ ${cartItems}
     setShowCheckout(false);
     setOrderInfo({ name: '', phone: '', address: '', notes: '' });
     alert('تم إرسال طلبك بنجاح! سيتم التواصل معك قريباً');
+    setCouponCode("");
+    setAppliedOffer(null);
+    setDiscount(0);
+    setCouponError(null);
   };
 
   if (showCheckout) {
@@ -232,7 +271,7 @@ ${cartItems}
             type="text"
             value={couponCode}
             onChange={e => setCouponCode(e.target.value)}
-            placeholder="ادخل كود الكوبون"
+            placeholder="ادخل كود الكوبون (رقم العرض أو اسمه)"
           />
           <button
             className="bg-blue-600 text-white px-4 py-2 rounded"
@@ -240,8 +279,10 @@ ${cartItems}
           >تطبيق الكوبون</button>
         </div>
         {couponError && <div className="mt-1 text-red-500">{couponError}</div>}
-        {appliedCoupon && !couponError && (
-          <div className="mt-1 text-green-700 font-bold">تم تطبيق الكوبون - خصم {appliedCoupon.discount_percent}%</div>
+        {appliedOffer && !couponError && (
+          <div className="mt-1 text-green-700 font-bold">
+            تم تطبيق الكوبون - خصم {appliedOffer.discount_percentage}%
+          </div>
         )}
       </div>
       <div>
