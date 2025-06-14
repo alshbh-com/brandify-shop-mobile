@@ -1,83 +1,95 @@
 
-/* متغيرات CSS للتصميمات المخصصة */
+/* تصميم مستلهم من iOS حديث - ألوان باستيليه، زوايا ناعمة، ظلال لطيفة، خطوط أنيقة */
+
 :root {
-  --theme-primary: #8B5CF6;
-  --theme-secondary: #A78BFA;
-  --theme-accent: #F3E8FF;
-  --theme-background: #F9FAFB;
-  --theme-surface: #FFFFFF;
-  --theme-text: #1F2937;
-  --theme-text-secondary: #6B7280;
-  --theme-gradient-header: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%);
-  --theme-gradient-card: linear-gradient(135deg, #F3E8FF 0%, #E0E7FF 100%);
-  --theme-gradient-button: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+  --theme-primary: #007aff;
+  --theme-secondary: #34c759;
+  --theme-accent: #f2f3f7;
+  --theme-background: #f8f8fa;
+  --theme-surface: #ffffff;
+  --theme-text: #222b45;
+  --theme-text-secondary: #8e8e93;
+  --theme-gradient-header: linear-gradient(135deg, #e1e9f7 0%, #f8f8fa 100%);
+  --theme-gradient-card: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  --theme-gradient-button: linear-gradient(90deg, #007aff 0%, #34c759 100%);
+  --theme-card-radius: 28px;
+  --theme-card-shadow: 0 8px 16px 0 rgba(60, 60, 60, 0.04), 0 1.5px 4px 0 rgba(0,0,0,.07);
+  --theme-btn-radius: 18px;
+  --theme-border: #e5e5ea;
 }
 
-/* تطبيق التصميم على جميع العناصر الأساسية */
 * {
-  transition: all 0.3s ease !important;
+  font-family: 'Cairo', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-html,
-body,
-#root,
-.min-h-screen {
+html, body, #root, .min-h-screen {
   background: var(--theme-background) !important;
   color: var(--theme-text) !important;
+  min-height: 100vh;
 }
 
-/* إخفاء شريط التمرير للعناصر الأفقية */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-/* تأثيرات الحركة للبطاقات */
-.group:hover .group-hover\:scale-110 {
-  transform: scale(1.1);
-}
-
-.group:hover .group-hover\:opacity-100 {
-  opacity: 1;
-}
-
-.group:hover .group-hover\:text-blue-600 {
-  color: #2563eb;
-}
-
-.group:hover .group-hover\:animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* تطبيق التصميم على البطاقات والخلفيات */
+/* بطاقات المنتجات */
 .bg-white,
 .bg-gray-50,
 .bg-gray-100,
-.bg-gray-200,
 [class*="bg-white"],
 [class*="bg-gray-50"],
 [class*="bg-gray-100"] {
   background: var(--theme-surface) !important;
   color: var(--theme-text) !important;
+  border-radius: var(--theme-card-radius) !important;
+  box-shadow: var(--theme-card-shadow) !important;
+  border: 1px solid var(--theme-border) !important;
 }
 
-/* تطبيق التصميم على جميع أنواع الهيدرات والعناوين */
-.bg-gradient-to-r,
-[class*="from-purple"],
-[class*="from-blue"],
-[class*="to-purple"],
-[class*="to-blue"],
-header,
-.header {
-  background: var(--theme-gradient-header) !important;
-  color: white !important;
+/* عناوين */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--theme-text) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.015em;
 }
 
-/* تطبيق التصميم على جميع الأزرار */
+/* نص ثانوي */
+.text-gray-600,
+.text-gray-500,
+.text-gray-400,
+small {
+  color: var(--theme-text-secondary) !important;
+}
+
+/* نص عادي */
+.text-gray-900,
+.text-gray-800,
+.text-gray-700,
+.text-black,
+p, span, div {
+  color: var(--theme-text) !important;
+}
+
+/* خلفيات */
+.bg-blue-50,
+.bg-green-50,
+.bg-purple-50,
+.bg-indigo-50,
+[class*="bg-blue-50"],
+[class*="bg-green-50"],
+[class*="bg-purple-50"] {
+  background: var(--theme-accent) !important;
+  color: var(--theme-text) !important;
+}
+
+/* البادج */
+.badge, [class*="badge"] {
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  padding: 3px 10px;
+  font-size: 13px;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+}
+
+/* أزرار بتدرج iOS كزر Call to action */
+button,
 .bg-blue-500,
 .bg-blue-600,
 .bg-green-500,
@@ -92,125 +104,80 @@ button[class*="bg-purple"],
 button[class*="bg-indigo"],
 [role="button"] {
   background: var(--theme-gradient-button) !important;
-  color: white !important;
+  color: #fff !important;
   border: none !important;
+  border-radius: var(--theme-btn-radius) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(0,122,255,0.06);
+  padding: 0.7em 1.5em !important;
+  font-size: 17px;
 }
 
-/* تطبيق التصميم على جميع النصوص */
-.text-gray-900,
-.text-gray-800,
-.text-gray-700,
-.text-black,
-h1, h2, h3, h4, h5, h6,
-p, span, div {
-  color: var(--theme-text) !important;
+/* شريط التنقل السفلي */
+.fixed.bottom-0,
+.sticky.bottom-0 {
+  border-radius: 32px 32px 0 0 !important;
+  box-shadow: 0 1.5px 16px rgba(0,0,0,0.08) !important;
+  background: var(--theme-surface) !important;
+  border: 1.5px solid var(--theme-border) !important;
+  margin-bottom: 8px !important;
+  max-width: 420px;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
 }
 
-.text-gray-600,
-.text-gray-500,
-.text-gray-400,
-small {
-  color: var(--theme-text-secondary) !important;
+/* جعل الأيقونات بلون نظام iOS */
+svg {
+  stroke: var(--theme-primary) !important;
 }
 
-/* تطبيق التصميم على الحدود */
-.border-gray-200,
-.border-gray-300,
-.border-gray-400,
-[class*="border-gray"] {
-  border-color: var(--theme-accent) !important;
-}
-
-/* تطبيق التصميم على الخلفيات الملونة */
-.bg-blue-50,
-.bg-green-50,
-.bg-purple-50,
-.bg-indigo-50,
-[class*="bg-blue-50"],
-[class*="bg-green-50"],
-[class*="bg-purple-50"] {
-  background: var(--theme-accent) !important;
-  color: var(--theme-text) !important;
-}
-
-/* تطبيق التصميم على النصوص الملونة */
-.text-blue-600,
-.text-green-600,
-.text-purple-600,
-.text-indigo-600,
-a {
-  color: var(--theme-primary) !important;
-}
-
-/* تطبيق التصميم على المدخلات */
+/* حواف المدخلات */
 input,
 textarea,
 select {
   background: var(--theme-surface) !important;
   color: var(--theme-text) !important;
-  border-color: var(--theme-accent) !important;
+  border: 1.2px solid var(--theme-border) !important;
+  border-radius: 16px !important;
+  font-size: 17px;
 }
 
-input:focus,
-textarea:focus,
-select:focus {
-  border-color: var(--theme-primary) !important;
+/* تأثيرات بسيطة */
+.card-shadow,
+.card-shadow:hover {
+  box-shadow: var(--theme-card-shadow) !important;
 }
 
-/* كلاسات مساعدة للتصميمات */
-.theme-primary-bg {
-  background: var(--theme-primary) !important;
-  color: white !important;
+/* مؤثرات التفاعل عند الضغط */
+button:active {
+  background: #287cff2a !important;
+  transform: scale(0.97);
 }
 
-.theme-secondary-bg {
-  background: var(--theme-secondary) !important;
-  color: white !important;
+/* شارات */
+.badge,
+[class*="badge"] {
+  letter-spacing: 0.007em;
 }
 
-.theme-accent-bg {
-  background: var(--theme-accent) !important;
-  color: var(--theme-text) !important;
+/* تكبير هوامش المنتجات لتعزيز المساحات البيضاء */
+.grid.grid-cols-2,
+.grid.lg\:grid-cols-3,
+.grid.xl\:grid-cols-4 {
+  gap: 2.2rem !important;
 }
 
-.theme-surface-bg {
-  background: var(--theme-surface) !important;
-  color: var(--theme-text) !important;
+/* خطوط أصغر لأسعار ومعلومات ثانوية */
+.text-xs, .text-sm {
+  font-size: 15px !important;
 }
 
-.theme-background-bg {
-  background: var(--theme-background) !important;
-  color: var(--theme-text) !important;
+/* للبطاقات الرئيسية */
+.card, .shadow-lg, .shadow-2xl {
+  box-shadow: var(--theme-card-shadow) !important;
+  border-radius: var(--theme-card-radius) !important;
 }
 
-.theme-text {
-  color: var(--theme-text) !important;
-}
-
-.theme-text-secondary {
-  color: var(--theme-text-secondary) !important;
-}
-
-.theme-primary-text {
-  color: var(--theme-primary) !important;
-}
-
-.theme-gradient-header {
-  background: var(--theme-gradient-header) !important;
-  color: white !important;
-}
-
-.theme-gradient-card {
-  background: var(--theme-gradient-card) !important;
-  color: var(--theme-text) !important;
-}
-
-.theme-gradient-button {
-  background: var(--theme-gradient-button) !important;
-  color: white !important;
-}
-
-/* تحسينات إضافية للتصميم الجديد */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -218,75 +185,24 @@ select:focus {
   overflow: hidden;
 }
 
-/* تأثيرات الحركة الجديدة */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+/* شريط تمرير أنيق */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d2d7e5;
+  border-radius: 16px;
+}
+::-webkit-scrollbar-track {
+  background: #f3f4fa;
+}
+
+@media (max-width: 500px) {
+  .fixed.bottom-0,
+  .sticky.bottom-0 {
+    max-width: 100vw;
+    margin-bottom: 0 !important;
+    border-radius: 18px 18px 0 0 !important;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out forwards;
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.4s ease-out forwards;
-}
-
-/* تحسينات للشاشات الصغيرة */
-@media (max-width: 640px) {
-  .grid-cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-  }
-}
-
-/* تحسينات للشاشات المتوسطة */
-@media (min-width: 1024px) {
-  .lg\:grid-cols-3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-/* تحسينات للشاشات الكبيرة */
-@media (min-width: 1280px) {
-  .xl\:grid-cols-4 {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-/* تطبيق قوي للتصميم على التطبيق بالكامل */
-[class*="bg-"],
-[class*="text-"],
-[class*="border-"] {
-  transition: all 0.3s ease !important;
-}
-
-/* تأكد من تطبيق التصميم على العناصر المشتركة */
-.container,
-.grid,
-.flex,
-section,
-main,
-article,
-aside,
-nav,
-footer {
-  color: var(--theme-text) !important;
 }
