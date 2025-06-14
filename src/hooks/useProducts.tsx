@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -9,6 +8,7 @@ interface Product {
   image: string;
   category_id: string;
   description: string;
+  merchant_id?: string;
 }
 
 interface Category {

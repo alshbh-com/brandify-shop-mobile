@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,7 +24,7 @@ const AuthScreen = () => {
   const [loading, setLoading] = useState(false);
 
   const { signUp, signIn } = useAuth();
-  const { login } = useApp();
+  const { setUser } = useApp(); // Changed from login to setUser
   const { t } = useSettingsContext();
 
   const togglePasswordVisibility = () => {
@@ -43,7 +44,7 @@ const AuthScreen = () => {
       if (isLogin) {
         const { user } = await signIn(formData.email, formData.password);
         if (user) {
-          await login(user);
+          setUser(user); // Changed from login to setUser
         }
       } else {
         await signUp(
