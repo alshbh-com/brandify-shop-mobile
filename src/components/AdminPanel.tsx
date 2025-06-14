@@ -44,7 +44,7 @@ const AdminPanel = () => {
     discount_percent: '',
     start_date: '',
     end_date: '',
-    max_usage: 1,
+    max_usage: '', // Use string to match controlled input
   });
 
   const [productForm, setProductForm] = useState({
@@ -104,17 +104,11 @@ const AdminPanel = () => {
         updateStoreName(localStoreName);
       }
     }, 500);
-
     return () => clearTimeout(timer);
   }, [localStoreName, storeName, updateStoreName]);
 
-  useEffect(() => {
-    async function fetchCoupons() {
-      const { data, error } = await supabase.from('coupons').select("*").order('created_at', { ascending: false });
-      if (!error) setCoupons(data || []);
-    }
-    fetchCoupons();
-  }, []);
+  // REMOVE useEffect that fetched coupons from Supabase (because there is no such table)
+  // useEffect(() => { ... }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'product' | 'category') => {
     const file = e.target.files?.[0];
@@ -230,47 +224,40 @@ const AdminPanel = () => {
     setShowRatingForm(false);
   };
 
+  // Coupon submit logic: DO NOT call Supabase (comment-out or clear), just update coupons state for demonstration
   const handleCouponSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!couponForm.code || !couponForm.discount_percent || !couponForm.end_date) {
       alert('يرجى تعبئة جميع الحقول المطلوبة');
       return;
     }
-
+    // Add/update the coupon locally for now.
     const couponData = {
+      id: editingCoupon?.id || Date.now().toString(),
       code: couponForm.code.trim().toUpperCase(),
       discount_percent: parseInt(couponForm.discount_percent),
-      start_date: couponForm.start_date ? new Date(couponForm.start_date).toISOString() : new Date().toISOString(),
-      end_date: new Date(couponForm.end_date).toISOString(),
+      start_date: couponForm.start_date || new Date().toISOString().split('T')[0],
+      end_date: couponForm.end_date,
       max_usage: parseInt(couponForm.max_usage) || 1,
+      usage_count: 0,
       is_active: true,
+      created_at: new Date().toISOString(),
     };
-
     if (editingCoupon) {
-      // تحديث
-      const { error } = await supabase.from('coupons').update(couponData).eq('id', editingCoupon.id);
-      if (error) alert("تعذر التحديث: "+error.message);
+      setCoupons(prev =>
+        prev.map(c => (c.id === editingCoupon.id ? couponData : c))
+      );
     } else {
-      // إضافة
-      const { error } = await supabase.from('coupons').insert(couponData);
-      if (error) alert("تعذر الإضافة: "+error.message);
+      setCoupons(prev => [couponData, ...prev]);
     }
-    // أعد التحميل
-    const { data, error } = await supabase.from('coupons').select("*").order('created_at', { ascending: false });
-    if (!error) setCoupons(data || []);
     setShowCouponForm(false);
     setEditingCoupon(null);
-    setCouponForm({ code: '', discount_percent: '', start_date: '', end_date: '', max_usage: 1 });
+    setCouponForm({ code: '', discount_percent: '', start_date: '', end_date: '', max_usage: '' });
   };
 
   const handleDeleteCoupon = async (id: string) => {
     if (!window.confirm("هل أنت متأكد من حذف الكوبون؟")) return;
-    const { error } = await supabase.from('coupons').delete().eq('id', id);
-    if (!error) {
-      setCoupons(prev => prev.filter(c => c.id !== id));
-    } else {
-      alert('تعذر الحذف');
-    }
+    setCoupons(prev => prev.filter(c => c.id !== id));
   };
 
   const startEditProduct = (product: any) => {
@@ -418,7 +405,7 @@ const AdminPanel = () => {
             coupons={coupons}
             onAddCoupon={() => {
               setEditingCoupon(null);
-              setCouponForm({ code: '', discount_percent: '', start_date: '', end_date: '', max_usage: 1 });
+              setCouponForm({ code: '', discount_percent: '', start_date: '', end_date: '', max_usage: '' });
               setShowCouponForm(true);
             }}
             onEditCoupon={coupon => {
@@ -426,9 +413,9 @@ const AdminPanel = () => {
               setCouponForm({
                 code: coupon.code,
                 discount_percent: coupon.discount_percent.toString(),
-                start_date: coupon.start_date?.slice(0,10),
-                end_date: coupon.end_date?.slice(0,10),
-                max_usage: coupon.max_usage,
+                start_date: coupon.start_date?.slice(0, 10),
+                end_date: coupon.end_date?.slice(0, 10),
+                max_usage: coupon.max_usage?.toString() || '',
               });
               setShowCouponForm(true);
             }}
@@ -501,7 +488,7 @@ const AdminPanel = () => {
         onClose={() => {
           setShowCouponForm(false);
           setEditingCoupon(null);
-          setCouponForm({ code: '', discount_percent: '', start_date: '', end_date: '', max_usage: 1 });
+          setCouponForm({ code: '', discount_percent: '', start_date: '', end_date: '', max_usage: '' });
         }}
         onSubmit={handleCouponSubmit}
         onFormChange={u => setCouponForm(prev => ({ ...prev, ...u }))}
