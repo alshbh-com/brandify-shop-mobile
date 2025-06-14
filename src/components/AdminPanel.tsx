@@ -21,6 +21,9 @@ import ProductForm from './admin/forms/ProductForm';
 import CategoryForm from './admin/forms/CategoryForm';
 import OfferForm from './admin/forms/OfferForm';
 import RatingForm from './admin/forms/RatingForm';
+import AdminCouponsTab from './admin/AdminCouponsTab';
+import CouponForm from './admin/forms/CouponForm';
+import { supabase } from '@/integrations/supabase/client';
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState('store');
@@ -33,6 +36,16 @@ const AdminPanel = () => {
   const [editingOffer, setEditingOffer] = useState<any>(null);
   const [editingRating, setEditingRating] = useState<any>(null);
   const [localStoreName, setLocalStoreName] = useState('');
+  const [coupons, setCoupons] = useState<any[]>([]);
+  const [showCouponForm, setShowCouponForm] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState<any>(null);
+  const [couponForm, setCouponForm] = useState({
+    code: '',
+    discount_percent: '',
+    start_date: '',
+    end_date: '',
+    max_usage: 1,
+  });
 
   const [productForm, setProductForm] = useState({
     name: '',
@@ -94,6 +107,14 @@ const AdminPanel = () => {
 
     return () => clearTimeout(timer);
   }, [localStoreName, storeName, updateStoreName]);
+
+  useEffect(() => {
+    async function fetchCoupons() {
+      const { data, error } = await supabase.from('coupons').select("*").order('created_at', { ascending: false });
+      if (!error) setCoupons(data || []);
+    }
+    fetchCoupons();
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'product' | 'category') => {
     const file = e.target.files?.[0];
@@ -207,6 +228,49 @@ const AdminPanel = () => {
 
     setRatingForm({ product_id: '', rating: '', admin_comment: '' });
     setShowRatingForm(false);
+  };
+
+  const handleCouponSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!couponForm.code || !couponForm.discount_percent || !couponForm.end_date) {
+      alert('يرجى تعبئة جميع الحقول المطلوبة');
+      return;
+    }
+
+    const couponData = {
+      code: couponForm.code.trim().toUpperCase(),
+      discount_percent: parseInt(couponForm.discount_percent),
+      start_date: couponForm.start_date ? new Date(couponForm.start_date).toISOString() : new Date().toISOString(),
+      end_date: new Date(couponForm.end_date).toISOString(),
+      max_usage: parseInt(couponForm.max_usage) || 1,
+      is_active: true,
+    };
+
+    if (editingCoupon) {
+      // تحديث
+      const { error } = await supabase.from('coupons').update(couponData).eq('id', editingCoupon.id);
+      if (error) alert("تعذر التحديث: "+error.message);
+    } else {
+      // إضافة
+      const { error } = await supabase.from('coupons').insert(couponData);
+      if (error) alert("تعذر الإضافة: "+error.message);
+    }
+    // أعد التحميل
+    const { data, error } = await supabase.from('coupons').select("*").order('created_at', { ascending: false });
+    if (!error) setCoupons(data || []);
+    setShowCouponForm(false);
+    setEditingCoupon(null);
+    setCouponForm({ code: '', discount_percent: '', start_date: '', end_date: '', max_usage: 1 });
+  };
+
+  const handleDeleteCoupon = async (id: string) => {
+    if (!window.confirm("هل أنت متأكد من حذف الكوبون؟")) return;
+    const { error } = await supabase.from('coupons').delete().eq('id', id);
+    if (!error) {
+      setCoupons(prev => prev.filter(c => c.id !== id));
+    } else {
+      alert('تعذر الحذف');
+    }
   };
 
   const startEditProduct = (product: any) => {
@@ -348,6 +412,29 @@ const AdminPanel = () => {
             onDeleteRating={deleteRating}
           />
         )}
+
+        {activeTab === 'coupons' && (
+          <AdminCouponsTab
+            coupons={coupons}
+            onAddCoupon={() => {
+              setEditingCoupon(null);
+              setCouponForm({ code: '', discount_percent: '', start_date: '', end_date: '', max_usage: 1 });
+              setShowCouponForm(true);
+            }}
+            onEditCoupon={coupon => {
+              setEditingCoupon(coupon);
+              setCouponForm({
+                code: coupon.code,
+                discount_percent: coupon.discount_percent.toString(),
+                start_date: coupon.start_date?.slice(0,10),
+                end_date: coupon.end_date?.slice(0,10),
+                max_usage: coupon.max_usage,
+              });
+              setShowCouponForm(true);
+            }}
+            onDeleteCoupon={handleDeleteCoupon}
+          />
+        )}
       </div>
 
       <ProductForm
@@ -405,6 +492,19 @@ const AdminPanel = () => {
         }}
         onSubmit={handleRatingSubmit}
         onFormChange={(updates) => setRatingForm(prev => ({ ...prev, ...updates }))}
+      />
+
+      <CouponForm
+        show={showCouponForm}
+        editing={editingCoupon}
+        form={couponForm}
+        onClose={() => {
+          setShowCouponForm(false);
+          setEditingCoupon(null);
+          setCouponForm({ code: '', discount_percent: '', start_date: '', end_date: '', max_usage: 1 });
+        }}
+        onSubmit={handleCouponSubmit}
+        onFormChange={u => setCouponForm(prev => ({ ...prev, ...u }))}
       />
     </div>
   );
