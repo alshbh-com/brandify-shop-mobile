@@ -108,6 +108,14 @@ const ProfileScreen = () => {
 
   const userAge = calculateAge(user.birthDate);
 
+  // Add this function to handle contacting the manager via WhatsApp
+  const handleContactManager = () => {
+    // Replace with your admin WhatsApp number as needed
+    const adminWhatsApp = "201010101010";
+    const message = encodeURIComponent("مرحبًا، أرجو تفعيل حساب التاجر الخاص بي.");
+    window.open(`https://wa.me/${adminWhatsApp}?text=${message}`, "_blank");
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 pb-20">
       <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">{t('profile')}</h1>
