@@ -54,6 +54,42 @@ export type Database = {
         }
         Relationships: []
       }
+      coupons: {
+        Row: {
+          code: string
+          created_at: string | null
+          discount_percent: number
+          end_date: string
+          id: string
+          is_active: boolean
+          max_usage: number
+          start_date: string
+          usage_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          discount_percent: number
+          end_date: string
+          id?: string
+          is_active?: boolean
+          max_usage?: number
+          start_date?: string
+          usage_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          discount_percent?: number
+          end_date?: string
+          id?: string
+          is_active?: boolean
+          max_usage?: number
+          start_date?: string
+          usage_count?: number
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           created_at: string
@@ -173,25 +209,31 @@ export type Database = {
           birth_date: string
           created_at: string | null
           id: string
+          merchant_status: string | null
           name: string
           profile_image: string | null
           updated_at: string | null
+          whatsapp_number: string | null
         }
         Insert: {
           birth_date: string
           created_at?: string | null
           id: string
+          merchant_status?: string | null
           name: string
           profile_image?: string | null
           updated_at?: string | null
+          whatsapp_number?: string | null
         }
         Update: {
           birth_date?: string
           created_at?: string | null
           id?: string
+          merchant_status?: string | null
           name?: string
           profile_image?: string | null
           updated_at?: string | null
+          whatsapp_number?: string | null
         }
         Relationships: []
       }

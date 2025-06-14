@@ -105,19 +105,49 @@ const CartScreen = () => {
       alert('السلة فارغة');
       return;
     }
-
     if (!orderInfo.name || !orderInfo.phone || !orderInfo.address) {
       alert('يرجى ملء جميع الحقول المطلوبة');
       return;
     }
-
+    // تحديد رقم الواتساب المناسب (تاجر/مدير)
+    let targetWhatsapp = "201204486263"; // المدير الافتراضي
+    // هل كل المنتجات تتبع تاجر واحد approved فقط؟
+    let merchantNumber = null;
+    let merchantId = null;
+    if (cart.length) {
+      // جلب البيانات لمرة واحدة فقط
+      const productIds = cart.map(item => item.product.id);
+      // جلب منتجات مع البروفايل المرتبط بها (عبر جدول المنتجات ثم profiles)
+      // سنفترض أنك ربطت كل منتج بـ تاجر داخل profile_id أو owner_id. 
+      // إذا لا يوجد، هنا سنجعل القرار على أول منتج فقط كمثال.
+      // سنبحث عن مالك المنتج من profile
+      const { data: ownerProfiles } = await supabase
+        .from("products")
+        .select("id, owner_id")
+        .in("id", productIds);
+      if (ownerProfiles && ownerProfiles.length) {
+        const ownerId = ownerProfiles[0].owner_id;
+        if (ownerId) {
+          // جلب بروفايل المالك
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("whatsapp_number, merchant_status")
+            .eq("id", ownerId)
+            .maybeSingle();
+          if (profile && profile.merchant_status === "approved" && profile.whatsapp_number) {
+            merchantNumber = profile.whatsapp_number;
+            merchantId = ownerId;
+            targetWhatsapp = merchantNumber;
+          }
+        }
+      }
+    }
+    // منطق تجهيز رسالة الأوردر كما هو
     const cartItems = cart.map(item =>
       `${item.product.name} - الكمية: ${item.quantity} - السعر: ${item.product.price * item.quantity} ج.م`
     ).join('\n');
-
     const message = `
 🛍️ طلب جديد من ${orderInfo.name}
-
 📱 رقم الهاتف: ${orderInfo.phone}
 📍 العنوان: ${orderInfo.address}
 
@@ -130,7 +160,7 @@ ${discount > 0 && appliedOffer ? `🎟️ استخدم كوبون (${couponCode}
 📝 ملاحظات: ${orderInfo.notes || 'لا توجد ملاحظات'}
     `;
 
-    // سجل استخدام الكوبون ان وجد
+    // سجل استخدام الكوبون كما هو
     if (appliedOffer && user?.id) {
       await supabase.from("coupon_usages").insert([{
         coupon_id: appliedOffer.id,
@@ -138,12 +168,10 @@ ${discount > 0 && appliedOffer ? `🎟️ استخدم كوبون (${couponCode}
       }]);
     }
 
-    // رقم الواتساب الجديد 
-    const phoneNumber = '201204486263';
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-    
+    // افتح واتساب حسب منطق صاحب الطلب
+    const whatsappUrl = `https://wa.me/${targetWhatsapp}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
-    
+
     clearCart();
     setShowCheckout(false);
     setOrderInfo({ name: '', phone: '', address: '', notes: '' });

@@ -108,8 +108,55 @@ const AdminPanel = () => {
     return () => clearTimeout(timer);
   }, [localStoreName, storeName, updateStoreName]);
 
-  // REMOVE useEffect that fetched coupons from Supabase (because there is no such table)
-  // useEffect(() => { ... }, []);
+  // -------------- NEW: إدارة الكوبونات بشكل فعلي مع Supabase --------------
+  useEffect(() => {
+    // جلب الكوبونات من Supabase
+    async function fetchCoupons() {
+      const { data, error } = await supabase
+        .from("coupons")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (!error && data) setCoupons(data);
+    }
+    fetchCoupons();
+  }, []);
+
+  const handleCouponSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!couponForm.code || !couponForm.discount_percent || !couponForm.end_date) {
+      alert('يرجى تعبئة جميع الحقول المطلوبة');
+      return;
+    }
+    const couponData = {
+      code: couponForm.code.trim().toUpperCase(),
+      discount_percent: parseInt(couponForm.discount_percent),
+      start_date: couponForm.start_date || new Date().toISOString().split('T')[0],
+      end_date: couponForm.end_date,
+      max_usage: parseInt(couponForm.max_usage) || 1,
+      is_active: true,
+    };
+    if (editingCoupon) {
+      // تحديث الكوبون
+      await supabase.from("coupons").update(couponData).eq("id", editingCoupon.id);
+    } else {
+      // إضافة كوبون جديد
+      await supabase.from("coupons").insert([couponData]);
+    }
+    // إعادة الجلب بعد التعديل أو الإضافة
+    const { data } = await supabase.from("coupons").select("*").order("created_at", { ascending: false });
+    setCoupons(data || []);
+    setShowCouponForm(false);
+    setEditingCoupon(null);
+    setCouponForm({ code: '', discount_percent: '', start_date: '', end_date: '', max_usage: '' });
+  };
+
+  const handleDeleteCoupon = async (id: string) => {
+    if (!window.confirm("هل أنت متأكد من حذف الكوبون؟")) return;
+    await supabase.from("coupons").delete().eq("id", id);
+    // تحديث قائمة الكوبونات
+    const { data } = await supabase.from("coupons").select("*").order("created_at", { ascending: false });
+    setCoupons(data || []);
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'product' | 'category') => {
     const file = e.target.files?.[0];
@@ -223,42 +270,6 @@ const AdminPanel = () => {
 
     setRatingForm({ product_id: '', rating: '', admin_comment: '' });
     setShowRatingForm(false);
-  };
-
-  // Coupon submit logic: DO NOT call Supabase (comment-out or clear), just update coupons state for demonstration
-  const handleCouponSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!couponForm.code || !couponForm.discount_percent || !couponForm.end_date) {
-      alert('يرجى تعبئة جميع الحقول المطلوبة');
-      return;
-    }
-    // Add/update the coupon locally for now.
-    const couponData = {
-      id: editingCoupon?.id || Date.now().toString(),
-      code: couponForm.code.trim().toUpperCase(),
-      discount_percent: parseInt(couponForm.discount_percent),
-      start_date: couponForm.start_date || new Date().toISOString().split('T')[0],
-      end_date: couponForm.end_date,
-      max_usage: parseInt(couponForm.max_usage) || 1,
-      usage_count: 0,
-      is_active: true,
-      created_at: new Date().toISOString(),
-    };
-    if (editingCoupon) {
-      setCoupons(prev =>
-        prev.map(c => (c.id === editingCoupon.id ? couponData : c))
-      );
-    } else {
-      setCoupons(prev => [couponData, ...prev]);
-    }
-    setShowCouponForm(false);
-    setEditingCoupon(null);
-    setCouponForm({ code: '', discount_percent: '', start_date: '', end_date: '', max_usage: '' });
-  };
-
-  const handleDeleteCoupon = async (id: string) => {
-    if (!window.confirm("هل أنت متأكد من حذف الكوبون؟")) return;
-    setCoupons(prev => prev.filter(c => c.id !== id));
   };
 
   const startEditProduct = (product: any) => {

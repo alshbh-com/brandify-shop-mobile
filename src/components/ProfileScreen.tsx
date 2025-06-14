@@ -1,11 +1,11 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/contexts/AppContext';
 import { useSettingsContext } from '@/contexts/SettingsContext';
 import { User, Calendar, Mail, LogOut, Edit, Settings, Globe } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const ProfileScreen = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -13,30 +13,44 @@ const ProfileScreen = () => {
   const [editData, setEditData] = useState({
     name: '',
     birthDate: '',
-    profileImage: ''
+    profileImage: '',
+    whatsapp: '',
   });
-
+  const [merchantStatus, setMerchantStatus] = useState<string | null>(null);
   const { user, logout, updateUserProfile } = useApp();
   const { language, updateLanguage, t } = useSettingsContext();
+
+  useEffect(() => {
+    // جلب بيانات الحالة ورقم الواتساب من Supabase
+    const fetchMerchantFields = async () => {
+      if (user?.id) {
+        const { data, error } = await supabase.from("profiles").select("merchant_status, whatsapp_number").eq("id", user.id).maybeSingle();
+        if (data) {
+          setMerchantStatus(data.merchant_status);
+          setEditData(prev => ({ ...prev, whatsapp: data.whatsapp_number || "" }));
+        }
+      }
+    };
+    fetchMerchantFields();
+  }, [user && user.id]);
 
   const handleEditStart = () => {
     if (user) {
       setEditData({
         name: user.name,
         birthDate: user.birthDate,
-        profileImage: user.profileImage
+        profileImage: user.profileImage,
+        whatsapp: editData.whatsapp,
       });
       setIsEditing(true);
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editData.name || !editData.birthDate) {
       alert(t('fillAllFields'));
       return;
     }
-
-    // التحقق من العمر
     const calculateAge = (birthDate: string): number => {
       const today = new Date();
       const birth = new Date(birthDate);
@@ -47,14 +61,22 @@ const ProfileScreen = () => {
       }
       return age;
     };
-
     const age = calculateAge(editData.birthDate);
     if (age < 18) {
       alert(t('ageRestriction'));
       return;
     }
+    // تحديث بيانات البروفايل
+    await supabase
+      .from('profiles')
+      .update({
+        name: editData.name,
+        birth_date: editData.birthDate,
+        profile_image: editData.profileImage,
+        whatsapp_number: editData.whatsapp,
+      })
+      .eq('id', user.id);
 
-    updateUserProfile(editData);
     setIsEditing(false);
     alert(t('changesSaved'));
   };
@@ -166,7 +188,39 @@ const ProfileScreen = () => {
                 <p className="text-gray-800">{userAge} {t('years')}</p>
               </div>
             </div>
+
+            {/* حقل رقم واتساب للتاجر */}
+            <div className="flex items-center space-x-3 space-x-reverse">
+              <User className="text-blue-500" size={20} />
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">رقم الواتساب (للتاجر)</label>
+                {isEditing ? (
+                  <Input
+                    type="text"
+                    value={editData.whatsapp}
+                    onChange={e => setEditData(prev => ({ ...prev, whatsapp: e.target.value }))}
+                    className="border-gray-200"
+                    placeholder="مثال: 20XXXXXXXXX"
+                  />
+                ) : (
+                  <p className="text-gray-800 font-medium">{editData.whatsapp || "—"}</p>
+                )}
+              </div>
+            </div>
           </div>
+
+          {/* حالة التاجر وزر التواصل مع المدير */}
+          {merchantStatus === "pending" && (
+            <div className="mt-3 flex flex-col items-center space-y-2">
+              <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded font-semibold">في انتظار تفعيل حساب التاجر</div>
+              <Button className="bg-green-600" onClick={handleContactManager}>
+                تواصل مع المدير لتفعيل الحساب
+              </Button>
+            </div>
+          )}
+          {merchantStatus === "rejected" && (
+            <div className="mt-3 bg-red-100 text-red-800 px-4 py-2 rounded font-semibold">تم رفض تفعيل حساب التاجر - حسابك في وضع مستخدم عادي</div>
+          )}
 
           {/* Action Buttons */}
           <div className="mt-8 space-y-3">
