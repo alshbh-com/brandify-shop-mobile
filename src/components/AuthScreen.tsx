@@ -1,217 +1,206 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { useApp } from '@/contexts/AppContext';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/hooks/useAuth';
+import { useApp } from '@/contexts/AppContext';
+import { useSettingsContext } from '@/contexts/SettingsContext';
+import { Eye, EyeOff } from 'lucide-react';
 
 const AuthScreen = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [userType, setUserType] = useState<'user' | 'merchant'>('user');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     birthDate: '',
-    userType: 'user', // 'user' or 'merchant'
     whatsappNumber: '',
     storeName: ''
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  
-  const { signIn, signUp } = useApp();
+
+  const { signUp, signIn } = useAuth();
+  const { login } = useApp();
+  const { t } = useSettingsContext();
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     try {
       if (isLogin) {
-        await signIn(formData.email, formData.password);
+        const { user } = await signIn(formData.email, formData.password);
+        if (user) {
+          await login(user);
+        }
       } else {
-        if (!formData.name || !formData.email || !formData.password || !formData.birthDate) {
-          setError('يرجى ملء جميع الحقول المطلوبة');
-          return;
-        }
-
-        if (formData.userType === 'merchant' && !formData.whatsappNumber) {
-          setError('يرجى إدخال رقم الواتساب للتجار');
-          return;
-        }
-        
-        await signUp(formData.name, formData.email, formData.password, formData.birthDate, {
-          userType: formData.userType,
-          whatsappNumber: formData.whatsappNumber,
-          storeName: formData.storeName
-        });
-        setError('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول');
+        await signUp(
+          formData.name,
+          formData.email,
+          formData.password,
+          formData.birthDate,
+          {
+            userType,
+            whatsappNumber: formData.whatsappNumber,
+            storeName: formData.storeName
+          }
+        );
+        alert(t('registrationSuccess'));
         setIsLogin(true);
-        setFormData({ name: '', email: '', password: '', birthDate: '', userType: 'user', whatsappNumber: '', storeName: '' });
       }
     } catch (error: any) {
-      console.error('Auth error:', error);
-      if (error.message.includes('Invalid login credentials')) {
-        setError('بيانات الدخول غير صحيحة');
-      } else if (error.message.includes('User already registered')) {
-        setError('هذا البريد الإلكتروني مسجل مسبقاً');
-      } else {
-        setError(error.message || 'حدث خطأ، يرجى المحاولة مرة أخرى');
-      }
+      alert(error.message || t('authError'));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    setError('');
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
-        <CardHeader className="text-center pb-2">
-          <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <span className="text-white text-2xl font-bold">متجر</span>
-          </div>
-          <CardTitle className="text-2xl font-bold text-gray-800">
-            {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}
-          </CardTitle>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="max-w-md w-full space-y-8">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">{isLogin ? t('login') : t('register')}</CardTitle>
         </CardHeader>
-        
-        <CardContent className="space-y-4">
-          {error && (
-            <div className={`p-3 rounded-lg text-sm ${
-              error.includes('بنجاح') 
-                ? 'bg-green-50 text-green-700 border border-green-200' 
-                : 'bg-red-50 text-red-700 border border-red-200'
-            }`}>
-              {error}
-            </div>
-          )}
-          
+        <CardContent className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">الاسم</label>
+                <div>
+                  <Label htmlFor="name">{t('name')}</Label>
                   <Input
                     type="text"
-                    placeholder="أدخل اسمك"
+                    id="name"
+                    name="name"
                     value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    className="border-gray-200 focus:border-blue-500 transition-colors"
+                    onChange={handleInputChange}
                     required
                   />
                 </div>
-
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-gray-700">نوع الحساب</label>
-                  <RadioGroup 
-                    value={formData.userType} 
-                    onValueChange={(value) => handleInputChange('userType', value)}
-                    className="flex flex-col space-y-2"
-                  >
-                    <div className="flex items-center space-x-2 space-x-reverse">
-                      <RadioGroupItem value="user" id="user" />
-                      <Label htmlFor="user">مستخدم عادي</Label>
-                    </div>
-                    <div className="flex items-center space-x-2 space-x-reverse">
-                      <RadioGroupItem value="merchant" id="merchant" />
-                      <Label htmlFor="merchant">تاجر</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                {formData.userType === 'merchant' && (
-                  <>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-700">رقم الواتساب *</label>
-                      <Input
-                        type="text"
-                        placeholder="مثال: 20XXXXXXXXX"
-                        value={formData.whatsappNumber}
-                        onChange={(e) => handleInputChange('whatsappNumber', e.target.value)}
-                        className="border-gray-200 focus:border-blue-500 transition-colors"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-700">اسم المتجر (اختياري)</label>
-                      <Input
-                        type="text"
-                        placeholder="أدخل اسم متجرك"
-                        value={formData.storeName}
-                        onChange={(e) => handleInputChange('storeName', e.target.value)}
-                        className="border-gray-200 focus:border-blue-500 transition-colors"
-                      />
-                    </div>
-                  </>
-                )}
               </>
             )}
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">البريد الإلكتروني</label>
+            <div>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input
                 type="email"
-                placeholder="أدخل بريدك الإلكتروني"
+                id="email"
+                name="email"
                 value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                className="border-gray-200 focus:border-blue-500 transition-colors"
+                onChange={handleInputChange}
                 required
               />
             </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">كلمة المرور</label>
-              <Input
-                type="password"
-                placeholder="أدخل كلمة المرور"
-                value={formData.password}
-                onChange={(e) => handleInputChange('password', e.target.value)}
-                className="border-gray-200 focus:border-blue-500 transition-colors"
-                required
-              />
-            </div>
-            
-            {!isLogin && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">تاريخ الميلاد</label>
+            <div>
+              <Label htmlFor="password">{t('password')}</Label>
+              <div className="relative">
                 <Input
-                  type="date"
-                  value={formData.birthDate}
-                  onChange={(e) => handleInputChange('birthDate', e.target.value)}
-                  className="border-gray-200 focus:border-blue-500 transition-colors"
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
                   required
                 />
-                <p className="text-xs text-gray-500">*يجب أن يكون عمرك 18 عاماً أو أكثر</p>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-2 top-1/2 -translate-y-1/2"
+                  onClick={togglePasswordVisibility}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
               </div>
+            </div>
+            {!isLogin && (
+              <>
+                <div>
+                  <Label htmlFor="birthDate">{t('birthDate')}</Label>
+                  <Input
+                    type="date"
+                    id="birthDate"
+                    name="birthDate"
+                    value={formData.birthDate}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="whatsappNumber">{t('whatsappNumber')}</Label>
+                  <Input
+                    type="tel"
+                    id="whatsappNumber"
+                    name="whatsappNumber"
+                    value={formData.whatsappNumber}
+                    onChange={handleInputChange}
+                    placeholder="201234567890"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="storeName">{t('storeName')}</Label>
+                  <Input
+                    type="text"
+                    id="storeName"
+                    name="storeName"
+                    value={formData.storeName}
+                    onChange={handleInputChange}
+                    placeholder={t('storeNamePlaceholder')}
+                  />
+                </div>
+                <div>
+                  <Label>{t('userType')}</Label>
+                  <div className="flex space-x-4">
+                    <Button
+                      type="button"
+                      variant={userType === 'user' ? 'default' : 'outline'}
+                      onClick={() => setUserType('user')}
+                    >
+                      {t('user')}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={userType === 'merchant' ? 'default' : 'outline'}
+                      onClick={() => setUserType('merchant')}
+                    >
+                      {t('merchant')}
+                    </Button>
+                  </div>
+                </div>
+              </>
             )}
-            
-            <Button
-              type="submit"
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium py-2.5 rounded-lg transition-all duration-200 transform hover:scale-105"
-              disabled={loading}
-            >
-              {loading ? 'جاري المعالجة...' : (isLogin ? 'تسجيل الدخول' : 'إنشاء الحساب')}
-            </Button>
+            <div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? t('loading') : (isLogin ? t('login') : t('register'))}
+              </Button>
+            </div>
           </form>
-          
-          <div className="text-center pt-4 border-t border-gray-100">
-            <button
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setFormData({ name: '', email: '', password: '', birthDate: '', userType: 'user', whatsappNumber: '', storeName: '' });
-                setError('');
-              }}
-              className="text-blue-600 hover:text-blue-700 transition-colors text-sm font-medium"
-            >
-              {isLogin ? 'ليس لديك حساب؟ إنشاء حساب جديد' : 'لديك حساب؟ تسجيل الدخول'}
-            </button>
+          <div className="text-sm text-gray-600 text-center">
+            {isLogin ? (
+              <>
+                {t('noAccount')}
+                <Button variant="link" onClick={() => setIsLogin(false)}>
+                  {t('register')}
+                </Button>
+              </>
+            ) : (
+              <>
+                {t('alreadyHaveAccount')}
+                <Button variant="link" onClick={() => setIsLogin(true)}>
+                  {t('login')}
+                </Button>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>

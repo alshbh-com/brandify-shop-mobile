@@ -110,8 +110,7 @@ const ProfileScreen = () => {
 
   // Add this function to handle contacting the manager via WhatsApp
   const handleContactManager = () => {
-    // Replace with your admin WhatsApp number as needed
-    const adminWhatsApp = "201010101010";
+    const adminWhatsApp = "201204486263";
     const message = encodeURIComponent("مرحبًا، أرجو تفعيل حساب التاجر الخاص بي.");
     window.open(`https://wa.me/${adminWhatsApp}?text=${message}`, "_blank");
   };

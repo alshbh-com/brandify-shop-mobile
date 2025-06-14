@@ -1,126 +1,53 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/contexts/AppContext';
 import { useSettingsContext } from '@/contexts/SettingsContext';
+import { useCoupons } from '@/hooks/useCoupons';
 import { Minus, Plus, Trash2, ShoppingBag, Tag } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 
 const CartScreen = () => {
-  const { cart, updateCartQuantity, removeFromCart, clearCart, user } = useApp();
+  const { cart, updateQuantity, removeFromCart, clearCart } = useApp();
   const { t } = useSettingsContext();
+  const { coupons } = useCoupons();
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
-  const [couponError, setCouponError] = useState('');
-  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
 
-  const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const subtotal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   const discount = appliedCoupon ? (subtotal * appliedCoupon.discount_percent / 100) : 0;
   const total = subtotal - discount;
 
-  const applyCoupon = async () => {
-    if (!couponCode.trim()) {
-      setCouponError('يرجى إدخال كود الخصم');
-      return;
-    }
+  const applyCoupon = () => {
+    const coupon = coupons.find(c => 
+      c.code === couponCode && 
+      c.is_active && 
+      new Date(c.start_date) <= new Date() && 
+      new Date(c.end_date) >= new Date() &&
+      c.usage_count < c.max_usage
+    );
 
-    setIsApplyingCoupon(true);
-    setCouponError('');
-
-    try {
-      // التحقق من وجود الكوبون وصحته
-      const { data: coupon, error } = await supabase
-        .from('coupons')
-        .select('*')
-        .eq('code', couponCode.trim())
-        .eq('is_active', true)
-        .lte('start_date', new Date().toISOString().split('T')[0])
-        .gte('end_date', new Date().toISOString().split('T')[0])
-        .single();
-
-      if (error || !coupon) {
-        setCouponError('كود الخصم غير صحيح أو منتهي الصلاحية');
-        return;
-      }
-
-      // التحقق من عدد مرات الاستخدام
-      if (coupon.usage_count >= coupon.max_usage) {
-        setCouponError('تم استنفاد عدد مرات استخدام هذا الكوبون');
-        return;
-      }
-
-      // التحقق من استخدام المستخدم للكوبون من قبل
-      if (user) {
-        const { data: usage } = await supabase
-          .from('coupon_usages')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('coupon_id', coupon.code)
-          .single();
-
-        if (usage) {
-          setCouponError('لقد استخدمت هذا الكوبون من قبل');
-          return;
-        }
-      }
-
+    if (coupon) {
       setAppliedCoupon(coupon);
-      setCouponError('');
-    } catch (error) {
-      console.error('Error applying coupon:', error);
-      setCouponError('حدث خطأ أثناء تطبيق الكوبون');
-    } finally {
-      setIsApplyingCoupon(false);
+      alert(`تم تطبيق الكوبون! خصم ${coupon.discount_percent}%`);
+    } else {
+      alert('كود الكوبون غير صحيح أو منتهي الصلاحية');
     }
   };
 
   const removeCoupon = () => {
     setAppliedCoupon(null);
     setCouponCode('');
-    setCouponError('');
-  };
-
-  const handleCheckout = async () => {
-    if (!user) {
-      alert('يرجى تسجيل الدخول أولاً');
-      return;
-    }
-
-    // تسجيل استخدام الكوبون إذا تم تطبيقه
-    if (appliedCoupon) {
-      try {
-        // إضافة سجل استخدام الكوبون
-        await supabase.from('coupon_usages').insert({
-          user_id: user.id,
-          coupon_id: appliedCoupon.code
-        });
-
-        // تحديث عدد مرات الاستخدام
-        await supabase
-          .from('coupons')
-          .update({ usage_count: appliedCoupon.usage_count + 1 })
-          .eq('id', appliedCoupon.id);
-      } catch (error) {
-        console.error('Error recording coupon usage:', error);
-      }
-    }
-
-    // هنا يمكن إضافة منطق الدفع الفعلي
-    alert(`تم تأكيد الطلب بمبلغ ${total.toFixed(2)} جنيه!`);
-    clearCart();
-    setAppliedCoupon(null);
-    setCouponCode('');
   };
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4 pb-20 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 p-4 pb-20 flex flex-col items-center justify-center">
         <div className="text-center">
-          <ShoppingBag size={64} className="text-gray-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">{t('emptyCart')}</h2>
-          <p className="text-gray-500">{t('addItemsToCart')}</p>
+          <ShoppingBag size={64} className="text-gray-300 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-600 mb-2">{t('emptyCart')}</h2>
+          <p className="text-gray-500">{t('addProductsToCart')}</p>
         </div>
       </div>
     );
@@ -128,48 +55,47 @@ const CartScreen = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 pb-20">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">{t('cart')}</h1>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">{t('shoppingCart')}</h1>
       
       <div className="max-w-2xl mx-auto space-y-4">
         {cart.map((item) => (
-          <Card key={item.id} className="bg-white shadow-sm">
+          <Card key={item.product.id} className="bg-white shadow-sm">
             <CardContent className="p-4">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center space-x-4 space-x-reverse">
                 <img
-                  src={item.image}
-                  alt={item.name}
+                  src={item.product.image}
+                  alt={item.product.name}
                   className="w-16 h-16 object-cover rounded-lg"
                 />
                 <div className="flex-1">
-                  <h3 className="font-medium text-gray-800">{item.name}</h3>
-                  <p className="text-blue-600 font-semibold">{item.price} {t('currency')}</p>
+                  <h3 className="font-semibold text-gray-800">{item.product.name}</h3>
+                  <p className="text-blue-600 font-medium">{item.product.price} {t('currency')}</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center space-x-2 space-x-reverse">
                   <Button
-                    variant="outline"
                     size="sm"
-                    onClick={() => updateCartQuantity(item.id, item.quantity - 1)}
+                    variant="outline"
+                    onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
                     disabled={item.quantity <= 1}
                   >
                     <Minus size={16} />
                   </Button>
-                  <span className="w-8 text-center font-medium">{item.quantity}</span>
+                  <span className="w-8 text-center">{item.quantity}</span>
                   <Button
-                    variant="outline"
                     size="sm"
-                    onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
+                    variant="outline"
+                    onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
                   >
                     <Plus size={16} />
                   </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => removeFromCart(item.product.id)}
+                  >
+                    <Trash2 size={16} />
+                  </Button>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeFromCart(item.id)}
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 size={16} />
-                </Button>
               </div>
             </CardContent>
           </Card>
@@ -178,46 +104,31 @@ const CartScreen = () => {
         {/* Coupon Section */}
         <Card className="bg-white shadow-sm">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Tag size={20} className="text-blue-500" />
-              <h3 className="font-medium text-gray-800">كود الخصم</h3>
-            </div>
-            
+            <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
+              <Tag className="ml-2" size={20} />
+              كود الخصم
+            </h3>
             {!appliedCoupon ? (
               <div className="flex gap-2">
                 <Input
-                  placeholder="أدخل كود الخصم"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value)}
+                  placeholder="أدخل كود الخصم"
                   className="flex-1"
                 />
-                <Button 
-                  onClick={applyCoupon}
-                  disabled={isApplyingCoupon}
-                  className="bg-blue-500 hover:bg-blue-600"
-                >
-                  {isApplyingCoupon ? 'جاري التطبيق...' : 'تطبيق'}
+                <Button onClick={applyCoupon} disabled={!couponCode.trim()}>
+                  تطبيق
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center justify-between bg-green-50 p-3 rounded-lg">
-                <div>
-                  <span className="font-medium text-green-800">تم تطبيق الكوبون: {appliedCoupon.code}</span>
-                  <span className="text-green-600 block text-sm">خصم {appliedCoupon.discount_percent}%</span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={removeCoupon}
-                  className="text-red-500 hover:text-red-700"
-                >
+              <div className="bg-green-50 p-3 rounded-lg flex justify-between items-center">
+                <span className="text-green-800">
+                  تم تطبيق كوبون: {appliedCoupon.code} (-{appliedCoupon.discount_percent}%)
+                </span>
+                <Button size="sm" variant="outline" onClick={removeCoupon}>
                   إزالة
                 </Button>
               </div>
-            )}
-            
-            {couponError && (
-              <p className="text-red-500 text-sm mt-2">{couponError}</p>
             )}
           </CardContent>
         </Card>
@@ -225,15 +136,15 @@ const CartScreen = () => {
         {/* Order Summary */}
         <Card className="bg-white shadow-sm">
           <CardContent className="p-4">
-            <h3 className="font-medium text-gray-800 mb-3">{t('orderSummary')}</h3>
+            <h3 className="font-semibold text-gray-800 mb-4">{t('orderSummary')}</h3>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span>{t('subtotal')}</span>
+                <span className="text-gray-600">{t('subtotal')}</span>
                 <span>{subtotal.toFixed(2)} {t('currency')}</span>
               </div>
               {appliedCoupon && (
                 <div className="flex justify-between text-green-600">
-                  <span>الخصم ({appliedCoupon.discount_percent}%)</span>
+                  <span>خصم ({appliedCoupon.discount_percent}%)</span>
                   <span>-{discount.toFixed(2)} {t('currency')}</span>
                 </div>
               )}
@@ -242,13 +153,18 @@ const CartScreen = () => {
                 <span className="text-blue-600">{total.toFixed(2)} {t('currency')}</span>
               </div>
             </div>
-            
-            <Button 
-              className="w-full mt-4 bg-blue-500 hover:bg-blue-600"
-              onClick={handleCheckout}
-            >
-              {t('checkout')}
-            </Button>
+            <div className="mt-6 space-y-3">
+              <Button className="w-full bg-blue-500 hover:bg-blue-600">
+                {t('proceedToCheckout')}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={clearCart}
+              >
+                {t('clearCart')}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
