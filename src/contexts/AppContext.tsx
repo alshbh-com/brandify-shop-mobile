@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
@@ -68,6 +69,10 @@ interface AppContextType {
   removeFromCart: (productId: string) => void;
   updateCartQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
+  
+  // New merchant filtering
+  currentMerchantId: string | null;
+  getFilteredProducts: () => Product[];
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -98,6 +103,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
   
   const [isAdmin, setIsAdmin] = useState(false);
+  const [currentMerchantId, setCurrentMerchantId] = useState<string | null>(null);
+
+  // تحديد التاجر الحالي بناءً على السلة
+  useEffect(() => {
+    if (cart.length > 0) {
+      const firstProduct = cart[0].product as any;
+      const merchantId = firstProduct.merchant_id || firstProduct.user_id || null;
+      setCurrentMerchantId(merchantId);
+    } else {
+      setCurrentMerchantId(null);
+    }
+  }, [cart]);
 
   // حفظ السلة في localStorage عند تغييرها
   useEffect(() => {
@@ -112,6 +129,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     if (!auth.user) {
       setCart([]);
+      setCurrentMerchantId(null);
       localStorage.removeItem('shopping_cart');
     }
   }, [auth.user]);
@@ -137,6 +155,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await auth.signOut();
     setIsAdmin(false);
     setCart([]);
+    setCurrentMerchantId(null);
     localStorage.removeItem('shopping_cart');
   };
 
@@ -149,21 +168,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addToCart = (product: Product) => {
-    setCart(prev => {
-      const existingItem = prev.find(item => item.product.id === product.id);
-      if (existingItem) {
-        return prev.map(item =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
+    const productWithMerchant = product as any;
+    const productMerchantId = productWithMerchant.merchant_id || productWithMerchant.user_id || null;
+    
+    // إذا كانت السلة فارغة أو المنتج من نفس التاجر
+    if (cart.length === 0 || currentMerchantId === productMerchantId) {
+      setCart(prev => {
+        const existingItem = prev.find(item => item.product.id === product.id);
+        if (existingItem) {
+          return prev.map(item =>
+            item.product.id === product.id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          );
+        }
+        return [...prev, { product, quantity: 1 }];
+      });
+    } else {
+      // إذا كان المنتج من تاجر مختلف، اسأل المستخدم
+      const confirmMessage = 'يوجد منتجات في السلة من تاجر آخر. هل تريد إفراغ السلة وإضافة هذا المنتج؟';
+      if (confirm(confirmMessage)) {
+        setCart([{ product, quantity: 1 }]);
+        setCurrentMerchantId(productMerchantId);
       }
-      return [...prev, { product, quantity: 1 }];
-    });
+    }
   };
 
   const removeFromCart = (productId: string) => {
-    setCart(prev => prev.filter(item => item.product.id !== productId));
+    setCart(prev => {
+      const newCart = prev.filter(item => item.product.id !== productId);
+      if (newCart.length === 0) {
+        setCurrentMerchantId(null);
+      }
+      return newCart;
+    });
   };
 
   const updateCartQuantity = (productId: string, quantity: number) => {
@@ -182,7 +220,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const clearCart = () => {
     setCart([]);
+    setCurrentMerchantId(null);
     localStorage.removeItem('shopping_cart');
+  };
+
+  const getFilteredProducts = () => {
+    // إذا لم توجد منتجات في السلة، أظهر كل المنتجات
+    if (!currentMerchantId) {
+      return products.products;
+    }
+    
+    // أظهر منتجات التاجر الحالي فقط
+    return products.products.filter(product => {
+      const productWithMerchant = product as any;
+      const productMerchantId = productWithMerchant.merchant_id || productWithMerchant.user_id || null;
+      return productMerchantId === currentMerchantId;
+    });
   };
 
   const value: AppContextType = {
@@ -210,7 +263,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateCategory: products.updateCategory,
     deleteCategory: products.deleteCategory,
     
-    // Store Settings
     settings: storeSettings.settings,
     settingsLoading: storeSettings.loading,
     storeName: storeSettings.settings?.store_name || 'متجر البرندات',
@@ -220,7 +272,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateWelcomeImage,
     checkAdminPassword: storeSettings.checkAdminPassword,
     
-    // Cart & Admin
+    // Cart & Admin with new filtering
     cart,
     isAdmin,
     adminLogin,
@@ -228,7 +280,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addToCart,
     removeFromCart,
     updateCartQuantity,
-    clearCart
+    clearCart,
+    currentMerchantId,
+    getFilteredProducts
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

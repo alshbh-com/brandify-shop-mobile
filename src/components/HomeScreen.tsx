@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useApp } from '@/contexts/AppContext';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, AlertCircle } from 'lucide-react';
 import StoreHeader from './StoreHeader';
 import OffersSection from './OffersSection';
 import CategoryFilter from './CategoryFilter';
@@ -17,18 +17,24 @@ const HomeScreen = () => {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   
   const { 
-    products, 
     categories, 
     storeName, 
-    adminLogin
+    adminLogin,
+    currentMerchantId,
+    getFilteredProducts,
+    cart,
+    clearCart
   } = useApp();
+
+  // استخدام المنتجات المفلترة بدلاً من جميع المنتجات
+  const availableProducts = getFilteredProducts();
 
   const getCategoryName = (categoryId: string) => {
     const category = categories.find(c => c.id === categoryId);
     return category ? category.name : 'غير محدد';
   };
 
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = availableProducts.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || product.category_id === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -53,6 +59,31 @@ const HomeScreen = () => {
         onAdminClick={() => setShowAdminLogin(true)}
       />
 
+      {/* تحذير عند وجود منتجات في السلة */}
+      {currentMerchantId && cart.length > 0 && (
+        <div className="px-6 mb-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-blue-800 font-medium text-sm">
+                يتم عرض منتجات تاجر واحد فقط لتجنب الخلط في الطلبات
+              </p>
+              <p className="text-blue-600 text-xs mt-1">
+                لرؤية منتجات تجار آخرين، قم بإفراغ السلة أولاً
+              </p>
+            </div>
+            <Button
+              onClick={clearCart}
+              size="sm"
+              variant="outline"
+              className="text-blue-600 border-blue-200 hover:bg-blue-100 text-xs px-3 py-1 h-auto"
+            >
+              إفراغ السلة
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* قسم العروض المميزة */}
       <OffersSection />
 
@@ -75,11 +106,11 @@ const HomeScreen = () => {
           <div className="flex items-center gap-3">
             <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
             <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              جميع المنتجات
+              {currentMerchantId ? 'منتجات التاجر المختار' : 'جميع المنتجات'}
             </h2>
           </div>
           <div className="text-sm text-gray-500">
-            {filteredProducts.length} من أصل {products.length} منتج
+            {filteredProducts.length} من أصل {availableProducts.length} منتج
           </div>
         </div>
         
