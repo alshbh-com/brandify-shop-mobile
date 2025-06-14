@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Store, Package, Tag, Heart, Star, Percent, Users, Settings, CheckCircle } from 'lucide-react';
+import { Store, Package, Tag, Heart, Star, Percent, Users, Settings, CheckCircle, BarChart3 } from 'lucide-react';
 
 interface AdminNavigationProps {
   activeTab: string;
@@ -11,6 +11,7 @@ const AdminNavigation = ({ activeTab, onTabChange }: AdminNavigationProps) => {
   const tabs = [
     { id: 'store', label: 'إعدادات المتجر', icon: Store },
     { id: 'themes', label: 'الثيمات', icon: Settings },
+    { id: 'analytics', label: 'الإحصائيات', icon: BarChart3 },
     { id: 'products', label: 'المنتجات', icon: Package },
     { id: 'categories', label: 'الأقسام', icon: Tag },
     { id: 'offers', label: 'العروض', icon: Percent },
@@ -18,6 +19,7 @@ const AdminNavigation = ({ activeTab, onTabChange }: AdminNavigationProps) => {
     { id: 'ratings', label: 'التقييمات', icon: Star },
     { id: 'coupons', label: 'الكوبونات', icon: Percent },
     { id: 'approvals', label: 'طلبات الموافقة', icon: CheckCircle },
+    { id: 'referrals', label: 'نظام الإحالة', icon: Users },
     { id: 'users', label: 'المستخدمين', icon: Users }
   ];
 

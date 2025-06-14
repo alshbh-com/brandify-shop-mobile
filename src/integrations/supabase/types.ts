@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      analytics: {
+        Row: {
+          id: string
+          page_visited: string | null
+          user_agent: string | null
+          user_id: string | null
+          visited_at: string
+          visitor_ip: string | null
+        }
+        Insert: {
+          id?: string
+          page_visited?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          visited_at?: string
+          visitor_ip?: string | null
+        }
+        Update: {
+          id?: string
+          page_visited?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          visited_at?: string
+          visitor_ip?: string | null
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string | null
@@ -213,6 +240,50 @@ export type Database = {
           },
         ]
       }
+      orders: {
+        Row: {
+          created_at: string
+          id: string
+          merchant_id: string | null
+          product_id: string | null
+          quantity: number
+          status: string
+          total_amount: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          merchant_id?: string | null
+          product_id?: string | null
+          quantity?: number
+          status?: string
+          total_amount: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          merchant_id?: string | null
+          product_id?: string | null
+          quantity?: number
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_approval_requests: {
         Row: {
           admin_notes: string | null
@@ -399,6 +470,84 @@ export type Database = {
           },
         ]
       }
+      referral_transactions: {
+        Row: {
+          commission_amount: number
+          created_at: string
+          id: string
+          order_id: string
+          referral_id: string
+          status: string
+        }
+        Insert: {
+          commission_amount: number
+          created_at?: string
+          id?: string
+          order_id: string
+          referral_id: string
+          status?: string
+        }
+        Update: {
+          commission_amount?: number
+          created_at?: string
+          id?: string
+          order_id?: string
+          referral_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_transactions_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "referrals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referrals: {
+        Row: {
+          commission_rate: number
+          created_at: string
+          id: string
+          referral_code: string
+          referred_id: string | null
+          referrer_id: string
+          status: string
+          total_earnings: number
+          updated_at: string
+        }
+        Insert: {
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          referral_code: string
+          referred_id?: string | null
+          referrer_id: string
+          status?: string
+          total_earnings?: number
+          updated_at?: string
+        }
+        Update: {
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          referral_code?: string
+          referred_id?: string | null
+          referrer_id?: string
+          status?: string
+          total_earnings?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       store_settings: {
         Row: {
           admin_password: string
@@ -455,6 +604,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_referral_code: {
+        Args: { user_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _user_id: string
