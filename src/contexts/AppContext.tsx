@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
@@ -31,6 +30,7 @@ interface AppContextType {
   profile: any;
   isAuthenticated: boolean;
   loading: boolean;
+  login: (user: any) => void;
   signUp: (name: string, email: string, password: string, birthDate: string) => Promise<any>;
   signIn: (email: string, password: string) => Promise<any>;
   signOut: () => Promise<void>;
@@ -116,6 +116,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [auth.user]);
 
+  const login = (user: any) => {
+    // This function can be used to set additional login state if needed
+    console.log('User logged in:', user);
+  };
+
   const adminLogin = (password: string): boolean => {
     if (storeSettings.checkAdminPassword(password)) {
       setIsAdmin(true);
@@ -186,6 +191,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     profile: profile.profile,
     isAuthenticated: !!auth.user,
     loading: auth.loading || profile.loading,
+    login,
     signUp: auth.signUp,
     signIn: auth.signIn,
     signOut: auth.signOut,

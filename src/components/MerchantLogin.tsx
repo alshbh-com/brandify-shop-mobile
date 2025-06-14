@@ -32,7 +32,7 @@ const MerchantLogin = ({ show, onClose, onSuccess }: MerchantLoginProps) => {
       // التحقق من كلمة مرور التاجر
       const { data, error } = await supabase
         .from('store_settings')
-        .select('merchant_password')
+        .select('merchant_password, id')
         .single();
 
       if (error) throw error;
@@ -42,7 +42,7 @@ const MerchantLogin = ({ show, onClose, onSuccess }: MerchantLoginProps) => {
         const { error: updateError } = await supabase
           .from('store_settings')
           .update({ merchant_password: password })
-          .eq('id', data.id || 1);
+          .eq('id', data.id);
 
         if (updateError) throw updateError;
         
