@@ -40,82 +40,94 @@ export const useAuth = () => {
   };
 
   const signUp = async (name: string, email: string, password: string, birthDate: string, additionalData?: any) => {
-    const age = calculateAge(birthDate);
-    if (age < 18) {
-      throw new Error('عذراً، يجب أن يكون عمرك 18 عاماً أو أكثر للتسجيل');
-    }
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
-          birth_date: birthDate,
-          user_type: additionalData?.userType || 'user',
-          whatsapp_number: additionalData?.whatsappNumber || '',
-          store_name: additionalData?.storeName || '',
-          store_logo: additionalData?.storeLogo || ''
-        }
+    try {
+      const age = calculateAge(birthDate);
+      if (age < 18) {
+        throw new Error('عذراً، يجب أن يكون عمرك 18 عاماً أو أكثر للتسجيل');
       }
-    });
 
-    if (error) throw error;
-
-    // إذا تم إنشاء المستخدم بنجاح، قم بإنشاء البروفايل وإضافة الأدوار
-    if (data.user) {
-      // إنشاء البروفايل
-      await supabase.from('profiles').upsert({
-        id: data.user.id,
-        name,
-        birth_date: birthDate,
-        whatsapp_number: additionalData?.whatsappNumber || null,
-        merchant_status: additionalData?.userType === 'merchant' ? 'pending' : null
-      });
-
-      // إضافة الدور المناسب
-      if (additionalData?.userType === 'merchant') {
-        await supabase.from('user_roles').insert({
-          user_id: data.user.id,
-          role: 'merchant'
-        });
-
-        // إنشاء القسم الفرعي (المتجر) للتاجر إذا كان اسم المتجر موجود
-        if (additionalData?.storeName) {
-          try {
-            // تحديد قسم افتراضي (يمكن تعديله لاحقاً)
-            const { data: categories } = await supabase
-              .from('categories')
-              .select('id')
-              .limit(1);
-            
-            if (categories && categories.length > 0) {
-              await supabase.from('subcategories').insert({
-                name: additionalData.storeName,
-                description: `متجر ${additionalData.storeName}`,
-                logo: additionalData?.storeLogo || '/placeholder.svg',
-                banner_image: additionalData?.storeLogo || '/placeholder.svg',
-                category_id: categories[0].id,
-                merchant_id: data.user.id,
-                is_active: true
-              });
-              
-              console.log('تم إنشاء المتجر الفرعي بنجاح:', additionalData.storeName);
-            }
-          } catch (subcategoryError) {
-            console.error('خطأ في إنشاء المتجر الفرعي:', subcategoryError);
-            // لا نقطع العملية إذا فشل إنشاء المتجر الفرعي
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            birth_date: birthDate,
+            user_type: additionalData?.userType || 'user',
+            whatsapp_number: additionalData?.whatsappNumber || '',
+            store_name: additionalData?.storeName || '',
+            store_logo: additionalData?.storeLogo || '',
+            store_category: additionalData?.storeCategory || ''
           }
         }
-      } else {
-        await supabase.from('user_roles').insert({
-          user_id: data.user.id,
-          role: 'user'
-        });
-      }
-    }
+      });
 
-    return data;
+      if (error) {
+        console.error('Signup error:', error);
+        throw error;
+      }
+
+      // إذا تم إنشاء المستخدم بنجاح، قم بإنشاء البروفايل وإضافة الأدوار
+      if (data.user) {
+        try {
+          // إنشاء البروفايل
+          await supabase.from('profiles').upsert({
+            id: data.user.id,
+            name,
+            birth_date: birthDate,
+            whatsapp_number: additionalData?.whatsappNumber || null,
+            merchant_status: additionalData?.userType === 'merchant' ? 'pending' : null
+          });
+
+          // إضافة الدور المناسب
+          if (additionalData?.userType === 'merchant') {
+            await supabase.from('user_roles').insert({
+              user_id: data.user.id,
+              role: 'merchant'
+            });
+
+            // إنشاء القسم الفرعي (المتجر) للتاجر إذا كان اسم المتجر موجود
+            if (additionalData?.storeName && additionalData?.storeCategory) {
+              try {
+                await supabase.from('subcategories').insert({
+                  name: additionalData.storeName,
+                  description: `متجر ${additionalData.storeName}`,
+                  logo: additionalData?.storeLogo || '/placeholder.svg',
+                  banner_image: additionalData?.storeLogo || '/placeholder.svg',
+                  category_id: additionalData.storeCategory,
+                  merchant_id: data.user.id,
+                  is_active: true
+                });
+                
+                console.log('تم إنشاء المتجر الفرعي بنجاح:', additionalData.storeName);
+              } catch (subcategoryError) {
+                console.error('خطأ في إنشاء المتجر الفرعي:', subcategoryError);
+                // لا نقطع العملية إذا فشل إنشاء المتجر الفرعي
+              }
+            }
+          } else {
+            await supabase.from('user_roles').insert({
+              user_id: data.user.id,
+              role: 'user'
+            });
+          }
+        } catch (profileError) {
+          console.error('خطأ في إنشاء البروفايل:', profileError);
+          // نستمر في العملية حتى لو فشل إنشاء البروفايل
+        }
+      }
+
+      return data;
+    } catch (error: any) {
+      console.error('SignUp error:', error);
+      
+      // معالجة أخطاء معدل الطلبات
+      if (error.message?.includes('over_email_send_rate_limit') || error.code === 'over_email_send_rate_limit') {
+        throw new Error('تم إرسال كثير من الطلبات. يرجى المحاولة مرة أخرى بعد بضع دقائق.');
+      }
+      
+      throw error;
+    }
   };
 
   const signIn = async (email: string, password: string) => {

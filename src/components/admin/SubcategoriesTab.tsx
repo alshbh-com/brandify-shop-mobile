@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, Edit, Trash2, Store } from 'lucide-react';
+import { Plus, Edit, Trash2, Store, Users, Settings } from 'lucide-react';
 import { useSubcategories } from '@/hooks/useSubcategories';
 import { useApp } from '@/contexts/AppContext';
 import SubcategoryForm from './forms/SubcategoryForm';
@@ -96,10 +96,24 @@ const SubcategoriesTab = () => {
     return category ? category.name : 'غير محدد';
   };
 
+  const toggleStatus = async (subcategory: any) => {
+    try {
+      await updateSubcategory(subcategory.id, {
+        ...subcategory,
+        is_active: !subcategory.is_active
+      });
+    } catch (error) {
+      console.error('Error updating subcategory status:', error);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">إدارة الأقسام الفرعية</h2>
+        <h2 className="text-xl font-bold flex items-center gap-2">
+          <Store className="w-5 h-5" />
+          إدارة الأقسام الفرعية والمتاجر
+        </h2>
         <Button
           onClick={handleAdd}
           className="bg-green-500 hover:bg-green-600"
@@ -111,31 +125,44 @@ const SubcategoriesTab = () => {
 
       <div className="grid gap-4">
         {subcategories.map(subcategory => (
-          <Card key={subcategory.id}>
+          <Card key={subcategory.id} className="overflow-hidden">
             <CardContent className="p-4">
               <div className="flex items-center gap-4">
                 <img
                   src={subcategory.logo}
                   alt={subcategory.name}
-                  className="w-16 h-16 object-cover rounded-lg"
+                  className="w-16 h-16 object-cover rounded-lg border"
                 />
                 <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold">{subcategory.name}</h3>
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="font-semibold text-lg">{subcategory.name}</h3>
                     <Store size={16} className="text-blue-500" />
+                    {subcategory.merchant_id && (
+                      <Users size={14} className="text-purple-500" title="مرتبط بتاجر" />
+                    )}
                   </div>
-                  <p className="text-sm text-gray-500">{getCategoryName(subcategory.category_id)}</p>
+                  <p className="text-sm text-gray-600 mb-1">
+                    <strong>القسم الرئيسي:</strong> {getCategoryName(subcategory.category_id)}
+                  </p>
                   {subcategory.description && (
-                    <p className="text-sm text-gray-600 mt-1">{subcategory.description}</p>
+                    <p className="text-sm text-gray-600 mb-2">{subcategory.description}</p>
                   )}
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      subcategory.is_active 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
+                  {subcategory.merchant_id && (
+                    <p className="text-xs text-purple-600 mb-2">
+                      <strong>معرف التاجر:</strong> {subcategory.merchant_id}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => toggleStatus(subcategory)}
+                      className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                        subcategory.is_active 
+                          ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                          : 'bg-red-100 text-red-800 hover:bg-red-200'
+                      }`}
+                    >
                       {subcategory.is_active ? 'نشط' : 'غير نشط'}
-                    </span>
+                    </button>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -143,6 +170,7 @@ const SubcategoriesTab = () => {
                     onClick={() => handleEdit(subcategory)}
                     size="sm"
                     variant="outline"
+                    className="text-blue-600 hover:text-blue-700"
                   >
                     <Edit size={16} />
                   </Button>

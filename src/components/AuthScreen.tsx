@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useApp } from '@/contexts/AppContext';
-import { Eye, EyeOff, Upload, Store } from 'lucide-react';
+import { Eye, EyeOff, Upload, Store, AlertCircle } from 'lucide-react';
 
 const AuthScreen = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -18,13 +18,15 @@ const AuthScreen = () => {
     userType: 'user',
     whatsappNumber: '',
     storeName: '',
-    storeLogo: ''
+    storeLogo: '',
+    storeCategory: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [rateLimitError, setRateLimitError] = useState(false);
   
   const { signIn, signUp } = useAuth();
-  const { login } = useApp();
+  const { login, categories } = useApp();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -42,24 +44,10 @@ const AuthScreen = () => {
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const validateForm = (): string | null => {
-    if (!isLogin) {
-      if (!formData.name) return 'الاسم مطلوب';
-      if (!formData.birthDate) return 'تاريخ الميلاد مطلوب';
-      if (formData.userType === 'merchant' && !formData.storeName) return 'اسم المتجر مطلوب';
-    }
-    if (!formData.email) return 'البريد الإلكتروني مطلوب';
-    if (!formData.password) return 'كلمة المرور مطلوبة';
-    return null;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setRateLimitError(false);
     setLoading(true);
 
     try {
@@ -73,11 +61,16 @@ const AuthScreen = () => {
           throw new Error('يرجى ملء جميع الحقول المطلوبة');
         }
         
+        if (formData.userType === 'merchant' && (!formData.storeName || !formData.storeCategory)) {
+          throw new Error('يرجى ملء اسم المتجر واختيار نوع المتجر');
+        }
+        
         const additionalData = {
           userType: formData.userType,
           whatsappNumber: formData.whatsappNumber,
           storeName: formData.storeName,
-          storeLogo: formData.storeLogo
+          storeLogo: formData.storeLogo,
+          storeCategory: formData.storeCategory
         };
         
         const { user } = await signUp(
@@ -93,7 +86,18 @@ const AuthScreen = () => {
         }
       }
     } catch (error: any) {
-      setError(error.message || 'حدث خطأ غير متوقع');
+      console.error('Auth error:', error);
+      
+      if (error.message?.includes('over_email_send_rate_limit') || error.message?.includes('rate limit')) {
+        setRateLimitError(true);
+        setError('تم إرسال كثير من الطلبات. يرجى المحاولة مرة أخرى بعد بضع دقائق.');
+      } else if (error.message?.includes('email')) {
+        setError('البريد الإلكتروني مستخدم بالفعل أو غير صالح');
+      } else if (error.message?.includes('password')) {
+        setError('كلمة المرور ضعيفة. يجب أن تكون 6 أحرف على الأقل');
+      } else {
+        setError(error.message || 'حدث خطأ غير متوقع');
+      }
     } finally {
       setLoading(false);
     }
@@ -110,8 +114,19 @@ const AuthScreen = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                {error}
+              <div className={`border px-4 py-3 rounded flex items-center gap-2 ${
+                rateLimitError 
+                  ? 'bg-yellow-50 border-yellow-200 text-yellow-700' 
+                  : 'bg-red-50 border-red-200 text-red-700'
+              }`}>
+                <AlertCircle className="w-4 h-4" />
+                <span className="text-sm">{error}</span>
+              </div>
+            )}
+
+            {rateLimitError && (
+              <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded text-sm">
+                <strong>نصيحة:</strong> حاول استخدام بريد إلكتروني مختلف أو انتظر 5-10 دقائق قبل المحاولة مرة أخرى.
               </div>
             )}
             
@@ -120,8 +135,9 @@ const AuthScreen = () => {
                 <div>
                   <label className="block text-sm font-medium mb-1">الاسم الكامل *</label>
                   <Input
+                    name="name"
                     value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={handleInputChange}
                     required
                   />
                 </div>
@@ -130,8 +146,9 @@ const AuthScreen = () => {
                   <label className="block text-sm font-medium mb-1">تاريخ الميلاد *</label>
                   <Input
                     type="date"
+                    name="birthDate"
                     value={formData.birthDate}
-                    onChange={(e) => setFormData(prev => ({ ...prev, birthDate: e.target.value }))}
+                    onChange={handleInputChange}
                     required
                   />
                 </div>
@@ -139,8 +156,9 @@ const AuthScreen = () => {
                 <div>
                   <label className="block text-sm font-medium mb-1">نوع الحساب</label>
                   <select
+                    name="userType"
                     value={formData.userType}
-                    onChange={(e) => setFormData(prev => ({ ...prev, userType: e.target.value }))}
+                    onChange={handleInputChange}
                     className="w-full p-2 border border-gray-300 rounded-md"
                   >
                     <option value="user">عميل</option>
@@ -151,11 +169,30 @@ const AuthScreen = () => {
                 {formData.userType === 'merchant' && (
                   <>
                     <div>
+                      <label className="block text-sm font-medium mb-1">نوع المتجر *</label>
+                      <select
+                        name="storeCategory"
+                        value={formData.storeCategory}
+                        onChange={handleInputChange}
+                        className="w-full p-2 border border-gray-300 rounded-md"
+                        required
+                      >
+                        <option value="">اختر نوع المتجر</option>
+                        {categories.map(category => (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
                       <label className="block text-sm font-medium mb-1">رقم الواتساب</label>
                       <Input
                         type="tel"
+                        name="whatsappNumber"
                         value={formData.whatsappNumber}
-                        onChange={(e) => setFormData(prev => ({ ...prev, whatsappNumber: e.target.value }))}
+                        onChange={handleInputChange}
                         placeholder="مثال: 201234567890"
                       />
                     </div>
@@ -163,8 +200,9 @@ const AuthScreen = () => {
                     <div>
                       <label className="block text-sm font-medium mb-1">اسم المتجر *</label>
                       <Input
+                        name="storeName"
                         value={formData.storeName}
-                        onChange={(e) => setFormData(prev => ({ ...prev, storeName: e.target.value }))}
+                        onChange={handleInputChange}
                         placeholder="اسم متجرك"
                         required
                       />
@@ -204,8 +242,9 @@ const AuthScreen = () => {
               <label className="block text-sm font-medium mb-1">البريد الإلكتروني *</label>
               <Input
                 type="email"
+                name="email"
                 value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                onChange={handleInputChange}
                 required
               />
             </div>
@@ -215,8 +254,9 @@ const AuthScreen = () => {
               <div className="relative">
                 <Input
                   type={showPassword ? 'text' : 'password'}
+                  name="password"
                   value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                  onChange={handleInputChange}
                   required
                 />
                 <button
@@ -229,7 +269,11 @@ const AuthScreen = () => {
               </div>
             </div>
             
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={loading}
+            >
               {loading ? 'جاري التحميل...' : (isLogin ? 'تسجيل الدخول' : 'إنشاء الحساب')}
             </Button>
             
