@@ -31,13 +31,13 @@ const IOS_THEME = {
 };
 
 const ThemeWrapper = ({ children }: { children: React.ReactNode }) => {
-  const { settings, loading } = useStoreSettings();
-
+  // نجبر جميع متغيرات التصميم الخاصة بستايل iOS
   useEffect(() => {
-    // دائماً طبّق ستايل iOS
     const theme = IOS_THEME;
     const root = document.documentElement;
     const body = document.body;
+
+    // متغيرات الألوان
     root.style.setProperty('--theme-primary', theme.colors.primary);
     root.style.setProperty('--theme-secondary', theme.colors.secondary);
     root.style.setProperty('--theme-accent', theme.colors.accent);
@@ -46,28 +46,33 @@ const ThemeWrapper = ({ children }: { children: React.ReactNode }) => {
     root.style.setProperty('--theme-text', theme.colors.text);
     root.style.setProperty('--theme-text-secondary', theme.colors.textSecondary);
 
+    // متغيرات التدرجات
     root.style.setProperty('--theme-gradient-header', theme.gradients.header);
     root.style.setProperty('--theme-gradient-card', theme.gradients.card);
     root.style.setProperty('--theme-gradient-button', theme.gradients.button);
 
+    // إعداد خلفيات وصف الألوان بقوة في البودي والجذر
     body.style.setProperty('background', theme.colors.background, 'important');
     body.style.setProperty('color', theme.colors.text, 'important');
     root.style.setProperty('background', theme.colors.background, 'important');
     root.style.setProperty('color', theme.colors.text, 'important');
     body.className = `theme-ios-modern`;
 
-    // التأثير على كل العناصر لنضمن التفعيل
+    // تعديلات على جميع العناصر لتأكيد التطبيق
     setTimeout(() => {
-      const allElements = document.querySelectorAll('*');
-      allElements.forEach(element => {
+      // ضبط خطوط كل العناصر
+      document.querySelectorAll('*').forEach(element => {
         const htmlElement = element as HTMLElement;
         if (htmlElement.style) {
-          htmlElement.style.display = 'none';
-          htmlElement.offsetHeight;
-          htmlElement.style.display = '';
+          htmlElement.style.fontFamily = "'Cairo', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif";
+          htmlElement.style.transition = 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)';
         }
       });
-    }, 20);
+      // إعادة رسم كامل للصفحة
+      body.style.display = 'none';
+      body.offsetHeight;
+      body.style.display = '';
+    }, 60);
   }, []);
 
   return <>{children}</>;
