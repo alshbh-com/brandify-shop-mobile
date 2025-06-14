@@ -138,7 +138,7 @@ const SubcategoriesTab = () => {
                     <h3 className="font-semibold text-lg">{subcategory.name}</h3>
                     <Store size={16} className="text-blue-500" />
                     {subcategory.merchant_id && (
-                      <Users size={14} className="text-purple-500" title="مرتبط بتاجر" />
+                      <Users size={14} className="text-purple-500" />
                     )}
                   </div>
                   <p className="text-sm text-gray-600 mb-1">
