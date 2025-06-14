@@ -1,17 +1,11 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 
-interface Subcategory {
-  id: string;
-  name: string;
-  description: string;
-  logo: string;
-  banner_image: string;
-  category_id: string;
-  merchant_id: string;
-  is_active: boolean;
-}
+type Subcategory = Database['public']['Tables']['subcategories']['Row'];
+type SubcategoryInsert = Database['public']['Tables']['subcategories']['Insert'];
+type SubcategoryUpdate = Database['public']['Tables']['subcategories']['Update'];
 
 export const useSubcategories = () => {
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
@@ -46,7 +40,7 @@ export const useSubcategories = () => {
     return subcategories.filter(sub => sub.category_id === categoryId);
   };
 
-  const addSubcategory = async (subcategory: Omit<Subcategory, 'id'>) => {
+  const addSubcategory = async (subcategory: SubcategoryInsert) => {
     try {
       const { data, error } = await supabase
         .from('subcategories')
@@ -64,7 +58,7 @@ export const useSubcategories = () => {
     }
   };
 
-  const updateSubcategory = async (id: string, updates: Partial<Subcategory>) => {
+  const updateSubcategory = async (id: string, updates: SubcategoryUpdate) => {
     try {
       const { data, error } = await supabase
         .from('subcategories')

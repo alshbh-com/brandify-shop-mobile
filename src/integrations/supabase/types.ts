@@ -360,6 +360,7 @@ export type Database = {
           size_l_price: number | null
           size_m_price: number | null
           size_s_price: number | null
+          subcategory_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -375,6 +376,7 @@ export type Database = {
           size_l_price?: number | null
           size_m_price?: number | null
           size_s_price?: number | null
+          subcategory_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -390,6 +392,7 @@ export type Database = {
           size_l_price?: number | null
           size_m_price?: number | null
           size_s_price?: number | null
+          subcategory_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -398,6 +401,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "subcategories"
             referencedColumns: ["id"]
           },
         ]
@@ -580,6 +590,60 @@ export type Database = {
           welcome_image?: string | null
         }
         Relationships: []
+      }
+      subcategories: {
+        Row: {
+          banner_image: string | null
+          category_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          logo: string | null
+          merchant_id: string | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          banner_image?: string | null
+          category_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo?: string | null
+          merchant_id?: string | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          banner_image?: string | null
+          category_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo?: string | null
+          merchant_id?: string | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subcategories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subcategories_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
