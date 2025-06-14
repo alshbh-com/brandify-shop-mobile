@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -37,7 +36,7 @@ const CartScreen = () => {
     }
 
     const cartItems = cart.map(item =>
-      `${item.product.name} - الكمية: ${item.quantity} - السعر: ${item.product.price * item.quantity} ر.س`
+      `${item.product.name} - الكمية: ${item.quantity} - السعر: ${item.product.price * item.quantity} ج.م`
     ).join('\n');
 
     const message = `
@@ -49,7 +48,7 @@ const CartScreen = () => {
 🛒 المنتجات:
 ${cartItems}
 
-💰 المجموع الكلي: ${total} ر.س
+💰 المجموع الكلي: ${total} ج.م
 
 📝 ملاحظات: ${orderInfo.notes || 'لا توجد ملاحظات'}
     `;
@@ -136,7 +135,7 @@ ${cartItems}
               <div className="flex justify-between text-xl font-bold">
                 <span className="text-gray-700">المجموع الكلي:</span>
                 <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  {total} ر.س
+                  {total} ج.م
                 </span>
               </div>
             </div>
@@ -198,7 +197,7 @@ ${cartItems}
                     <div className="flex-1">
                       <h3 className="font-bold text-gray-800 mb-1">{item.product.name}</h3>
                       <p className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold text-lg">
-                        {item.product.price} ر.س
+                        {item.product.price} ج.م
                       </p>
                     </div>
                     <div className="flex items-center space-x-3 space-x-reverse">
@@ -241,7 +240,7 @@ ${cartItems}
               <div className="flex justify-between items-center text-2xl font-bold mb-6">
                 <span className="text-gray-700">المجموع الكلي:</span>
                 <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  {total} ر.س
+                  {total} ج.م
                 </span>
               </div>
               <Button
