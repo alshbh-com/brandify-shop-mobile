@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,23 @@ const CartScreen = () => {
   const { getMerchantById } = useMerchants();
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [customerLocation, setCustomerLocation] = useState<string>('');
+
+  useEffect(() => {
+    // Get customer location automatically
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setCustomerLocation(`${latitude},${longitude}`);
+        },
+        (error) => {
+          console.log('Location access denied or unavailable');
+          setCustomerLocation('غير متاح');
+        }
+      );
+    }
+  }, []);
 
   const subtotal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   const discount = appliedCoupon ? (subtotal * appliedCoupon.discount_percent / 100) : 0;
@@ -74,18 +91,26 @@ const CartScreen = () => {
         merchantTotal += itemTotal;
         message += `• ${item.product.name}\n`;
         message += `  الكمية: ${item.quantity}\n`;
-        message += `  السعر: ${item.product.price} ريال\n`;
-        message += `  المجموع: ${itemTotal} ريال\n\n`;
+        message += `  السعر: ${item.product.price} جنيه مصري\n`;
+        message += `  المجموع: ${itemTotal} جنيه مصري\n\n`;
       });
 
       // إضافة الخصم إذا وُجد
       if (appliedCoupon && Object.keys(productsByMerchant).length === 1) {
         const discountAmount = merchantTotal * appliedCoupon.discount_percent / 100;
-        message += `الخصم (${appliedCoupon.discount_percent}%): -${discountAmount.toFixed(2)} ريال\n`;
+        message += `الخصم (${appliedCoupon.discount_percent}%): -${discountAmount.toFixed(2)} جنيه مصري\n`;
         merchantTotal -= discountAmount;
       }
 
-      message += `المجموع الكلي: ${merchantTotal.toFixed(2)} ريال\n\n`;
+      message += `المجموع الكلي: ${merchantTotal.toFixed(2)} جنيه مصري\n\n`;
+      
+      // إضافة موقع العميل
+      if (customerLocation && customerLocation !== 'غير متاح') {
+        message += `موقع العميل: https://maps.google.com/?q=${customerLocation}\n\n`;
+      } else {
+        message += `الموقع: غير متاح\n\n`;
+      }
+      
       message += `شكراً لكم 🌹`;
 
       // إنشاء رابط واتساب
@@ -130,7 +155,7 @@ const CartScreen = () => {
                 />
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-800">{item.product.name}</h3>
-                  <p className="text-blue-600 font-medium">{item.product.price} {t('currency')}</p>
+                  <p className="text-blue-600 font-medium">{item.product.price} جنيه مصري</p>
                 </div>
                 <div className="flex items-center space-x-2 space-x-reverse">
                   <Button
@@ -201,17 +226,17 @@ const CartScreen = () => {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-600">{t('subtotal')}</span>
-                <span>{subtotal.toFixed(2)} {t('currency')}</span>
+                <span>{subtotal.toFixed(2)} جنيه مصري</span>
               </div>
               {appliedCoupon && (
                 <div className="flex justify-between text-green-600">
                   <span>خصم ({appliedCoupon.discount_percent}%)</span>
-                  <span>-{discount.toFixed(2)} {t('currency')}</span>
+                  <span>-{discount.toFixed(2)} جنيه مصري</span>
                 </div>
               )}
               <div className="border-t pt-2 flex justify-between font-semibold text-lg">
                 <span>{t('total')}</span>
-                <span className="text-blue-600">{total.toFixed(2)} {t('currency')}</span>
+                <span className="text-blue-600">{total.toFixed(2)} جنيه مصري</span>
               </div>
             </div>
             <div className="mt-6 space-y-3">

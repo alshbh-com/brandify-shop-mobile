@@ -47,6 +47,16 @@ const translations = {
     arabic: 'العربية',
     english: 'الإنجليزية',
     
+    // Cart and Shopping
+    shoppingCart: 'سلة التسوق',
+    emptyCart: 'السلة فارغة',
+    addProductsToCart: 'أضف منتجات إلى السلة',
+    orderSummary: 'ملخص الطلب',
+    subtotal: 'المجموع الفرعي',
+    total: 'المجموع الكلي',
+    clearCart: 'إفراغ السلة',
+    currency: 'جنيه مصري',
+    
     // Validation Messages
     fillAllFields: 'يرجى ملء جميع الحقول المطلوبة',
     ageRestriction: 'عذراً، يجب أن يكون عمرك 18 عاماً أو أكثر',
@@ -78,6 +88,16 @@ const translations = {
     language: 'Language',
     arabic: 'Arabic',
     english: 'English',
+    
+    // Cart and Shopping
+    shoppingCart: 'Shopping Cart',
+    emptyCart: 'Cart is Empty',
+    addProductsToCart: 'Add products to cart',
+    orderSummary: 'Order Summary',
+    subtotal: 'Subtotal',
+    total: 'Total',
+    clearCart: 'Clear Cart',
+    currency: 'EGP',
     
     // Validation Messages
     fillAllFields: 'Please fill in all required fields',
