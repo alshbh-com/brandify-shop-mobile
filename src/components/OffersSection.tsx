@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useApp } from '@/contexts/AppContext';
 import { useOffers } from '@/hooks/useOffers';
-import { Star, Clock, ShoppingCart, Zap, Gift, Crown, Sparkles, TrendingUp, Fire } from 'lucide-react';
+import { Star, Clock, ShoppingCart, Zap, Gift, Crown, Sparkles, TrendingUp, Flame } from 'lucide-react';
 
 const OffersSection = () => {
   const { products, addToCart } = useApp();
@@ -55,7 +55,7 @@ const OffersSection = () => {
           <div className="inline-flex items-center gap-4 mb-6">
             <div className="relative">
               <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-full flex items-center justify-center animate-bounce">
-                <Fire className="w-8 h-8 text-white" />
+                <Flame className="w-8 h-8 text-white" />
               </div>
               <div className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
                 <Sparkles className="w-3 h-3 text-white" />
@@ -207,7 +207,7 @@ const OffersSection = () => {
           <div className="inline-flex items-center gap-4 bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-red-500/20 backdrop-blur-xl text-white px-8 py-4 rounded-2xl font-black text-xl border-2 border-yellow-400/50 shadow-2xl hover:scale-105 transition-transform">
             <Sparkles className="w-6 h-6 animate-spin text-yellow-300" />
             <span>⚡ عروض البرق - اطلب قبل نفاد الكمية! ⚡</span>
-            <Fire className="w-6 h-6 animate-bounce text-red-400" />
+            <Flame className="w-6 h-6 animate-bounce text-red-400" />
           </div>
         </div>
       </div>
