@@ -65,7 +65,8 @@ const CartScreen = () => {
 
     // تجميع المنتجات حسب التاجر
     const productsByMerchant = cart.reduce((acc, item) => {
-      const merchantId = item.product.merchant_id || 'unknown';
+      // استخدام user_id بدلاً من merchant_id إذا لم يكن متوفراً
+      const merchantId = (item.product as any).merchant_id || (item.product as any).user_id || 'unknown';
       if (!acc[merchantId]) {
         acc[merchantId] = [];
       }
@@ -91,18 +92,18 @@ const CartScreen = () => {
         merchantTotal += itemTotal;
         message += `• ${item.product.name}\n`;
         message += `  الكمية: ${item.quantity}\n`;
-        message += `  السعر: ${item.product.price} جنيه مصري\n`;
-        message += `  المجموع: ${itemTotal} جنيه مصري\n\n`;
+        message += `  السعر: ${item.product.price} ${t('currency')}\n`;
+        message += `  المجموع: ${itemTotal} ${t('currency')}\n\n`;
       });
 
       // إضافة الخصم إذا وُجد
       if (appliedCoupon && Object.keys(productsByMerchant).length === 1) {
         const discountAmount = merchantTotal * appliedCoupon.discount_percent / 100;
-        message += `الخصم (${appliedCoupon.discount_percent}%): -${discountAmount.toFixed(2)} جنيه مصري\n`;
+        message += `الخصم (${appliedCoupon.discount_percent}%): -${discountAmount.toFixed(2)} ${t('currency')}\n`;
         merchantTotal -= discountAmount;
       }
 
-      message += `المجموع الكلي: ${merchantTotal.toFixed(2)} جنيه مصري\n\n`;
+      message += `المجموع الكلي: ${merchantTotal.toFixed(2)} ${t('currency')}\n\n`;
       
       // إضافة موقع العميل
       if (customerLocation && customerLocation !== 'غير متاح') {
@@ -155,7 +156,7 @@ const CartScreen = () => {
                 />
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-800">{item.product.name}</h3>
-                  <p className="text-blue-600 font-medium">{item.product.price} جنيه مصري</p>
+                  <p className="text-blue-600 font-medium">{item.product.price} {t('currency')}</p>
                 </div>
                 <div className="flex items-center space-x-2 space-x-reverse">
                   <Button
@@ -226,17 +227,17 @@ const CartScreen = () => {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-600">{t('subtotal')}</span>
-                <span>{subtotal.toFixed(2)} جنيه مصري</span>
+                <span>{subtotal.toFixed(2)} {t('currency')}</span>
               </div>
               {appliedCoupon && (
                 <div className="flex justify-between text-green-600">
                   <span>خصم ({appliedCoupon.discount_percent}%)</span>
-                  <span>-{discount.toFixed(2)} جنيه مصري</span>
+                  <span>-{discount.toFixed(2)} {t('currency')}</span>
                 </div>
               )}
               <div className="border-t pt-2 flex justify-between font-semibold text-lg">
                 <span>{t('total')}</span>
-                <span className="text-blue-600">{total.toFixed(2)} جنيه مصري</span>
+                <span className="text-blue-600">{total.toFixed(2)} {t('currency')}</span>
               </div>
             </div>
             <div className="mt-6 space-y-3">

@@ -11,7 +11,26 @@ interface WelcomeScreenProps {
 
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
   const { profile, loading, storeName, welcomeImage } = useApp();
-  const { t } = useSettingsContext();
+  
+  // استخدام دالة محمية للحصول على السياق
+  let t: (key: string) => string;
+  try {
+    const { t: contextT } = useSettingsContext();
+    t = contextT;
+  } catch (error) {
+    // استخدام ترجمة افتراضية إذا لم يكن السياق متاحاً
+    t = (key: string) => {
+      const defaultTranslations: Record<string, string> = {
+        'dearCustomer': 'عزيزنا العميل',
+        'welcomeTitle': 'مرحباً بك في',
+        'welcomeGreeting': 'أهلاً وسهلاً،',
+        'welcomeDescription': 'استمتع بتجربة تسوق مميزة مع أفضل البرندات العالمية',
+        'startShopping': 'ابدأ التسوق',
+        'loading': 'جاري التحميل...'
+      };
+      return defaultTranslations[key] || key;
+    };
+  }
 
   const userName = profile?.name || t('dearCustomer');
 
