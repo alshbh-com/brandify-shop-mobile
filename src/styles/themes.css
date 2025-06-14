@@ -1,38 +1,39 @@
 
-/* تصميم عصري وجذاب - ألوان زاهية وتدرجات لافتة وظلال قوية وزوايا دائرية أكثر */
+/* ثيم عصري فاقع نابض بالألوان • تصميم 2025 */
 
-/* متغيرات theme */
+/* تعريف المتغيرات للألوان والتدرجات والزوايا والظل */
 :root {
-  --theme-primary: #ff3366;
-  --theme-secondary: #8268ff;
-  --theme-accent: #f3f0ff;
-  --theme-background: #f7faff;
+  --theme-primary: #ec5b2c;
+  --theme-secondary: #6e45e1;
+  --theme-accent: #fff7a5;
+  --theme-background: linear-gradient(135deg, #fcf6f5 0%, #f0f4ff 100%);
   --theme-surface: #fff;
-  --theme-text: #23272f;
-  --theme-text-secondary: #7c8496;
-  --theme-gradient-header: linear-gradient(90deg, #ff3366 0%, #8268ff 100%);
-  --theme-gradient-card: linear-gradient(120deg, #f0f4ff 0%, #ffe1f0 100%);
-  --theme-gradient-button: linear-gradient(90deg, #ff3366 0%, #8268ff 100%);
-  --theme-card-radius: 36px;
-  --theme-card-shadow: 0 4px 32px 0 rgba(130,104,255,.10), 0 4px 24px 0 rgba(255,51,102,.09);
-  --theme-btn-radius: 20px;
-  --theme-border: #e3e4ea;
+  --theme-text: #202035;
+  --theme-text-secondary: #757996;
+  --theme-gradient-header: linear-gradient(90deg, #ec5b2c 0%, #ffce00 50%, #6e45e1 100%);
+  --theme-gradient-card: linear-gradient(123deg, #fff7a5 0%, #ffc5f6 100%);
+  --theme-gradient-button: linear-gradient(90deg, #6e45e1 0%, #ec5b2c 70%, #ffce00 100%);
+  --theme-card-radius: 2.9rem;
+  --theme-card-shadow: 0 12px 38px 0 rgba(110,69,225,0.16), 0 8px 23px 0 rgba(236,91,44,0.13);
+  --theme-btn-radius: 2.2rem;
+  --theme-border: #e4dbfc;
 }
 
-/* تعميم الخط المميز والتحريك الناعم */
-* {
-  font-family: 'Cairo', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif !important;
-  transition: all 0.27s cubic-bezier(0.44, 0.09, 0.74, 0.72) !important;
+/* التحريك الناعم لكل العناصر */
+* { 
+  font-family: 'Cairo', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif !important; 
+  transition: all 0.24s cubic-bezier(0.6,0,0.45,1.05) !important;
 }
 
-/* خلفيات أساسية */
+/* خلفية جريئة */
 html, body, #root, .min-h-screen {
   background: var(--theme-background) !important;
   color: var(--theme-text) !important;
   min-height: 100vh;
+  scroll-behavior: smooth;
 }
 
-/* بطاقات المنتجات */
+/* البطاقات */
 .bg-white,
 .bg-gray-50,
 .bg-gray-100,
@@ -43,174 +44,151 @@ html, body, #root, .min-h-screen {
   color: var(--theme-text) !important;
   border-radius: var(--theme-card-radius) !important;
   box-shadow: var(--theme-card-shadow) !important;
-  border: 1.6px solid var(--theme-border) !important;
-  /* حركة عند التحويم */
-  transition: box-shadow 0.32s, transform 0.24s;
+  border: 2px solid var(--theme-border) !important;
+  transition: box-shadow 0.38s, transform 0.25s;
 }
-.bg-white:hover,
-.bg-gray-50:hover,
-.bg-gray-100:hover,
-[class*="bg-white"]:hover,
-[class*="bg-gray-50"]:hover,
-[class*="bg-gray-100"]:hover {
-  box-shadow: 0 10px 32px 0 rgba(130,104,255,0.13), 0 7px 22px 0 rgba(255,51,102,0.10);
-  transform: scale(1.025) translateY(-7px);
+.bg-white:hover, .bg-gray-50:hover, .bg-gray-100:hover,
+[class*="bg-white"]:hover, [class*="bg-gray-50"]:hover, [class*="bg-gray-100"]:hover {
+  box-shadow: 0 10px 42px 0 rgba(237,165,64,0.14), 0 17px 45px 0 rgba(110,69,225,0.17);
+  transform: scale(1.032) translateY(-10px) rotateZ(-0.6deg);
 }
 
-/* عناوين بتدرج */
+/* عناوين بتدرج فاقع */
 h1, h2, h3, h4, h5, h6 {
   background: var(--theme-gradient-header);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent !important;
-  font-weight: 900 !important;
-  letter-spacing: -0.017em;
-  transition: background 0.33s;
+  font-weight: 900;
+  text-shadow: 0 2px 12px #ffebbe22;
+  letter-spacing: -0.018em;
 }
 
-/* نص ثانوي */
-.text-gray-600,
-.text-gray-500,
-.text-gray-400,
-small {
+/* النص الثانوي */
+.text-gray-600,.text-gray-500,.text-gray-400,small {
   color: var(--theme-text-secondary) !important;
-  opacity: 0.9;
+  opacity: 0.86;
 }
 
-/* نص عادي */
+/* نصوص أساسية */
 .text-gray-900,
 .text-gray-800,
 .text-gray-700,
 .text-black,
-p, span, div {
+p, span, div, label {
   color: var(--theme-text) !important;
+  text-shadow: 0 1px 8px #fffad522;
 }
 
-/* خلفيات accent */
-.bg-blue-50,
-.bg-green-50,
-.bg-purple-50,
-.bg-indigo-50,
-[class*="bg-blue-50"],
-[class*="bg-green-50"],
-[class*="bg-purple-50"] {
+/* خلفية accent */
+.bg-blue-50, .bg-green-50, .bg-purple-50, .bg-indigo-50, 
+[class*="bg-blue-50"], [class*="bg-green-50"], [class*="bg-purple-50"] {
   background: var(--theme-accent) !important;
   color: var(--theme-text) !important;
+  border-radius: calc(var(--theme-card-radius) * 0.55) !important;
+  border: 1.2px solid #faedaf !important;
 }
 
-/* شارات مميزة */
+/* شارات مزخرفة */
 .badge, [class*="badge"] {
-  border-radius: 16px !important;
+  border-radius: 15px !important;
   font-weight: 700 !important;
-  padding: 5px 16px;
-  font-size: 15px;
-  box-shadow: 0 2px 8px 0 rgba(130,104,255,0.10);
-  background: linear-gradient(90deg, #ffb5d2 0%, #beaaff 100%);
-  color: #4d2260 !important;
-  border: none !important;
+  font-size: 16px;
+  box-shadow: 0 2.5px 10px 0 rgba(237,165,64,0.09);
+  background: linear-gradient(90deg,#fff7a5 0%, #ffb5e0 100%);
+  color: #772065 !important;
+  border: 0 !important;
+  margin-bottom: 1px;
+  letter-spacing: 0.04em;
+  padding: 4px 14px 4px 18px;
+  transition: box-shadow 0.22s, transform 0.22s;
 }
 
-/* أزرار بتدرج جذاب */
-button,
-.bg-blue-500,
-.bg-blue-600,
-.bg-green-500,
-.bg-green-600,
-.bg-purple-500,
-.bg-purple-600,
-.bg-indigo-500,
-.bg-indigo-600,
-button[class*="bg-blue"],
-button[class*="bg-green"],
-button[class*="bg-purple"],
-button[class*="bg-indigo"],
+/* أزرار مذهلة */
+button, 
+.bg-blue-500, .bg-blue-600, .bg-green-500, .bg-green-600,
+.bg-purple-500, .bg-purple-600, .bg-indigo-500, .bg-indigo-600,
+button[class*="bg-blue"], button[class*="bg-green"], button[class*="bg-purple"], button[class*="bg-indigo"],
 [role="button"] {
   background: var(--theme-gradient-button) !important;
   color: #fff !important;
-  border: none !important;
+  border: 0 !important;
   border-radius: var(--theme-btn-radius) !important;
-  font-weight: 700 !important;
-  box-shadow: 0 3px 14px rgba(255,51,102,0.10), 0 1.5px 6px 0 rgba(130,104,255,0.15);
-  padding: 0.8em 1.7em !important;
+  font-weight: 800;
+  box-shadow: 0 3px 22px rgba(110,69,225,0.13), 0 1.5px 10px 0 rgba(236,91,44,0.12);
+  padding: 0.88em 2.2em !important;
   font-size: 19px;
-  letter-spacing: 0.01em;
-  transition: transform 0.22s, box-shadow 0.22s;
+  letter-spacing: 0.018em;
+  transition: transform 0.23s, box-shadow 0.23s;
 }
 button:active {
-  background: #ff6d96cc !important;
+  background: #ec5b2cdd !important;
   transform: scale(0.96);
 }
 button:hover {
-  filter: brightness(1.10);
-  box-shadow: 0 7px 40px 0 rgba(255,51,102,0.17);
-  transform: scale(1.045) translateY(-2px);
+  filter: brightness(1.13) saturate(1.22);
+  box-shadow: 0 12px 46px 0 rgba(237,165,64,0.13);
+  transform: scale(1.06) translateY(-2px) rotateZ(1.5deg);
 }
 
-/* شريط التنقل السفلي */
-.fixed.bottom-0,
-.sticky.bottom-0 {
-  border-radius: 36px 36px 0 0 !important;
-  box-shadow: 0 4px 36px rgba(130,104,255,0.20) !important;
+/* التنقل السفلي والمكونات المثبتة بأسلوب عصري */
+.fixed.bottom-0, .sticky.bottom-0 {
+  border-radius: 3.4rem 3.4rem 0 0 !important;
+  box-shadow: 0 6px 36px rgba(110,69,225,0.20) !important;
   background: var(--theme-surface) !important;
-  border: 1.5px solid var(--theme-border) !important;
-  margin-bottom: 10px !important;
+  border: 2.2px solid var(--theme-border) !important;
+  margin-bottom: 7px !important;
   max-width: 440px;
   left: 50% !important;
   transform: translateX(-50%) !important;
 }
 
-/* جعل الأيقونات بلون أساسي حديث */
+/* أيقونات نابضة بالحياة */
 svg {
   stroke: var(--theme-primary) !important;
 }
 
-/* حواف المدخلات */
-input,
-textarea,
-select {
+/* إدخالات ناعمة */
+input, textarea, select {
   background: var(--theme-surface) !important;
   color: var(--theme-text) !important;
-  border: 1.5px solid var(--theme-border) !important;
-  border-radius: 19px !important;
-  font-size: 18px;
-  padding: 0.8em 1.1em;
-  box-shadow: 0 2px 10px 0 rgba(230,204,255,0.11);
-  font-weight: 500;
+  border: 1.6px solid var(--theme-border) !important;
+  border-radius: 20px !important;
+  font-size: 18.5px;
+  padding: 0.9em 1.2em;
+  box-shadow: 0 2.5px 13px 0 rgba(255,243,186,0.11);
+  font-weight: 600;
 }
 
-/* مؤثرات التفاعل عند الضغط على البطاقة */
-.card-shadow,
-.card-shadow:hover,
-.card, .shadow-lg, .shadow-2xl {
+/* ظل وحركة للبطاقة */
+.card-shadow, .card-shadow:hover, .card, .shadow-lg, .shadow-2xl {
   box-shadow: var(--theme-card-shadow) !important;
   border-radius: var(--theme-card-radius) !important;
   background: var(--theme-gradient-card) !important;
-  transition: box-shadow 0.32s, transform 0.24s !important;
+  transition: box-shadow 0.35s, transform 0.23s !important;
 }
 
-/* حركة بسيطة للبطاقة */
+/* حركة للمحتوى */
 .card, .shadow-lg, .shadow-2xl, .bg-white, .bg-gray-50, .bg-gray-100 {
-  transition: transform 0.23s cubic-bezier(0.445,0.05,0.55,0.95), box-shadow 0.27s cubic-bezier(0.445,0.05,0.55,0.95);
+  transition: 
+    transform 0.215s cubic-bezier(0.55,0.09,0.15,0.95),
+    box-shadow 0.26s cubic-bezier(0.4,0,0.6,1);
 }
 .card:hover, .shadow-lg:hover, .shadow-2xl:hover, .bg-white:hover, .bg-gray-50:hover, .bg-gray-100:hover {
-  transform: scale(1.033) translateY(-8px);
-  box-shadow: 0 12px 38px 0 rgba(130,104,255,0.16), 0 8px 23px 0 rgba(255,51,102,0.13);
+  transform: scale(1.038) translateY(-9px) rotateZ(-0.5deg);
+  box-shadow: 0 16px 38px 0 rgba(237,165,64,0.18), 0 9px 33px 0 rgba(110,69,225,0.19);
 }
 
-/* تكبير هوامش المنتجات والمسافات */
-.grid.grid-cols-2,
-.grid.lg\:grid-cols-3,
-.grid.xl\:grid-cols-4 {
-  gap: 2.4rem !important;
-  margin-bottom: 0.5rem;
+/* تكبير الهوامش والمسافات */
+.grid.grid-cols-2,.grid.lg\:grid-cols-3,.grid.xl\:grid-cols-4 {
+  gap: 2.55rem !important;
+  margin-bottom: 0.7rem;
 }
 
-/* خطوط أصغر للمعلومات الثانوية */
-.text-xs, .text-sm {
-  font-size: 16px !important;
-}
+/* خطوط للمعلومات الصغيرة */
+.text-xs, .text-sm { font-size: 16px !important; }
 
-/* نصوص اقصر و أوضح */
+/* نص مقلم مختصر */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -219,25 +197,15 @@ select {
 }
 
 /* شريط تمرير عصري */
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-::-webkit-scrollbar-thumb {
-  background: #d4d0f7;
-  border-radius: 16px;
-}
-::-webkit-scrollbar-track {
-  background: #fbe9f5;
-}
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-thumb { background: #f3e1fa; border-radius: 18px; }
+::-webkit-scrollbar-track { background: #fff2e1; }
 
-/* مؤثرات responsive */
+/* responsive */
 @media (max-width: 500px) {
-  .fixed.bottom-0,
-  .sticky.bottom-0 {
+  .fixed.bottom-0, .sticky.bottom-0 {
     max-width: 100vw;
     margin-bottom: 0 !important;
-    border-radius: 20px 20px 0 0 !important;
+    border-radius: 23px 23px 0 0 !important;
   }
 }
-
