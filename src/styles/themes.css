@@ -1,33 +1,33 @@
 
-/* تصميم عصري فاقع نابض بالألوان • 2025 */
+/* تصميم أنيق ومتوازن • 2025 */
 
-/* متغيرات الألوان والتدرجات */
+/* متغيرات الألوان المحدثة */
 :root {
-  --theme-primary: #ff3366;
-  --theme-secondary: #00d4ff;
-  --theme-accent: #ffd700;
-  --theme-success: #00ff88;
-  --theme-warning: #ff9500;
-  --theme-error: #ff4757;
-  --theme-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --theme-primary: #f97316;
+  --theme-secondary: #0ea5e9;
+  --theme-accent: #eab308;
+  --theme-success: #22c55e;
+  --theme-warning: #f59e0b;
+  --theme-error: #ef4444;
+  --theme-background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
   --theme-surface: #ffffff;
-  --theme-text: #1a1a2e;
-  --theme-text-secondary: #16213e;
-  --theme-gradient-header: linear-gradient(90deg, #ff3366 0%, #00d4ff 50%, #ffd700 100%);
-  --theme-gradient-card: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --theme-gradient-offer: linear-gradient(135deg, #ff3366 0%, #ff9500 50%, #ffd700 100%);
-  --theme-gradient-button: linear-gradient(90deg, #ff3366 0%, #00d4ff 100%);
-  --theme-card-radius: 2rem;
-  --theme-card-shadow: 0 20px 40px rgba(255, 51, 102, 0.3);
-  --theme-btn-radius: 2rem;
-  --theme-border: #e1e8ff;
-  --theme-glow: 0 0 30px rgba(255, 51, 102, 0.5);
+  --theme-text: #1f2937;
+  --theme-text-secondary: #6b7280;
+  --theme-gradient-header: linear-gradient(90deg, #f97316 0%, #dc2626 100%);
+  --theme-gradient-card: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  --theme-gradient-offer: linear-gradient(135deg, #f97316 0%, #dc2626 100%);
+  --theme-gradient-button: linear-gradient(90deg, #f97316 0%, #dc2626 100%);
+  --theme-card-radius: 1.5rem;
+  --theme-card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --theme-btn-radius: 1rem;
+  --theme-border: #e5e7eb;
+  --theme-glow: 0 0 20px rgba(249, 115, 22, 0.3);
 }
 
 /* الخط والانتقالات */
 * { 
-  font-family: 'Cairo', 'SF Pro Display', sans-serif !important; 
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  font-family: 'Cairo', 'Segoe UI', sans-serif !important; 
+  transition: all 0.3s ease !important;
 }
 
 /* الخلفية الأساسية */
@@ -38,7 +38,7 @@ html, body, #root {
   scroll-behavior: smooth;
 }
 
-/* البطاقات مع تأثير الضوء */
+/* البطاقات الأنيقة */
 .bg-white,
 .bg-gray-50,
 .bg-gray-100,
@@ -49,329 +49,206 @@ html, body, #root {
   color: var(--theme-text) !important;
   border-radius: var(--theme-card-radius) !important;
   box-shadow: var(--theme-card-shadow) !important;
-  border: 3px solid transparent !important;
-  background-clip: padding-box !important;
-  position: relative;
-  overflow: hidden;
-}
-
-.bg-white::before,
-.bg-gray-50::before,
-.bg-gray-100::before,
-[class*="bg-white"]::before,
-[class*="bg-gray-50"]::before,
-[class*="bg-gray-100"]::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--theme-gradient-header);
-  z-index: -1;
-  margin: -3px;
-  border-radius: inherit;
-  opacity: 0.8;
+  border: 1px solid var(--theme-border) !important;
 }
 
 .bg-white:hover, .bg-gray-50:hover, .bg-gray-100:hover,
 [class*="bg-white"]:hover, [class*="bg-gray-50"]:hover, [class*="bg-gray-100"]:hover {
-  transform: translateY(-15px) scale(1.05) rotateX(5deg);
-  box-shadow: 0 30px 60px rgba(255, 51, 102, 0.4), var(--theme-glow);
+  transform: translateY(-5px);
+  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.3);
 }
 
-/* عناوين بتأثير ثلاثي الأبعاد */
+/* عناوين متدرجة */
 h1, h2, h3, h4, h5, h6 {
   background: var(--theme-gradient-header);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent !important;
-  font-weight: 900;
-  text-shadow: 0 4px 8px rgba(255, 51, 102, 0.3);
-  letter-spacing: -0.02em;
-  position: relative;
-}
-
-h1::after, h2::after, h3::after {
-  content: attr(data-text);
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  background: rgba(0, 212, 255, 0.3);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  z-index: -1;
+  font-weight: 700;
 }
 
 /* النصوص */
 .text-gray-600, .text-gray-500, .text-gray-400, small {
   color: var(--theme-text-secondary) !important;
-  font-weight: 600;
 }
 
 .text-gray-900, .text-gray-800, .text-gray-700, .text-black, p, span, div, label {
   color: var(--theme-text) !important;
-  font-weight: 500;
 }
 
-/* خلفيات مميزة */
-.bg-blue-50, .bg-green-50, .bg-purple-50, .bg-indigo-50 {
-  background: linear-gradient(135deg, #ffd700 0%, #ff9500 100%) !important;
-  color: var(--theme-text) !important;
-  border-radius: 1.5rem !important;
-  border: 2px solid #ffed4a !important;
-  box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
+/* خلفيات ملونة */
+.bg-orange-50 {
+  background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%) !important;
 }
 
-/* شارات العروض */
+.bg-red-50 {
+  background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%) !important;
+}
+
+/* الشارات */
 .badge, [class*="badge"] {
-  background: var(--theme-gradient-offer) !important;
-  color: white !important;
-  border-radius: 2rem !important;
-  font-weight: 800 !important;
-  font-size: 14px;
-  padding: 8px 20px;
-  box-shadow: 0 8px 16px rgba(255, 51, 102, 0.4);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  border: 0 !important;
-  position: relative;
-  overflow: hidden;
+  border-radius: 1rem !important;
+  font-weight: 600 !important;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
 }
 
-.badge::before, [class*="badge"]::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  transition: left 0.5s;
-}
-
-.badge:hover::before, [class*="badge"]:hover::before {
-  left: 100%;
-}
-
-/* أزرار مذهلة */
+/* الأزرار الأنيقة */
 button, 
 .bg-blue-500, .bg-blue-600, .bg-green-500, .bg-green-600,
 .bg-purple-500, .bg-purple-600, .bg-indigo-500, .bg-indigo-600,
+.bg-orange-500, .bg-red-500,
 button[class*="bg-"], [role="button"] {
   background: var(--theme-gradient-button) !important;
   color: white !important;
   border: 0 !important;
   border-radius: var(--theme-btn-radius) !important;
-  font-weight: 800;
-  box-shadow: 0 15px 30px rgba(255, 51, 102, 0.4);
-  padding: 1rem 2.5rem !important;
-  font-size: 16px;
-  letter-spacing: 0.05em;
-  position: relative;
-  overflow: hidden;
-  text-transform: uppercase;
-}
-
-button::before, [role="button"]::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.2);
-  transition: width 0.3s;
-}
-
-button:hover::before, [role="button"]:hover::before {
-  width: 100%;
+  font-weight: 600;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  padding: 0.75rem 1.5rem !important;
 }
 
 button:hover, [role="button"]:hover {
-  transform: translateY(-8px) scale(1.1);
-  box-shadow: 0 25px 50px rgba(255, 51, 102, 0.6), var(--theme-glow);
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-button:active, [role="button"]:active {
-  transform: scale(0.95);
+/* حقول الإدخال */
+input, textarea, select {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: var(--theme-text) !important;
+  border: 2px solid var(--theme-border) !important;
+  border-radius: 0.75rem !important;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--theme-primary) !important;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+/* الكروت الفاخرة */
+.card-shadow, .shadow-lg, .shadow-2xl, .shadow-3xl {
+  box-shadow: var(--theme-card-shadow) !important;
+  border-radius: var(--theme-card-radius) !important;
+}
+
+.shadow-3xl {
+  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.3) !important;
 }
 
 /* التنقل السفلي */
 .fixed.bottom-0, .sticky.bottom-0 {
   background: var(--theme-surface) !important;
-  border-radius: 3rem 3rem 0 0 !important;
-  box-shadow: 0 -10px 30px rgba(255, 51, 102, 0.3) !important;
-  border: 3px solid transparent !important;
-  backdrop-filter: blur(20px);
-  position: relative;
-  overflow: hidden;
+  border-radius: 2rem 2rem 0 0 !important;
+  box-shadow: 0 -10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+  border-top: 1px solid var(--theme-border) !important;
 }
 
-.fixed.bottom-0::before, .sticky.bottom-0::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--theme-gradient-header);
-  z-index: -1;
-  margin: -3px;
-  border-radius: inherit;
-  opacity: 0.1;
-}
-
-/* أيقونات متوهجة */
+/* الأيقونات */
 svg {
-  filter: drop-shadow(0 0 8px rgba(255, 51, 102, 0.5));
-  transition: all 0.3s;
+  transition: all 0.2s ease;
 }
 
 svg:hover {
-  filter: drop-shadow(0 0 15px rgba(255, 51, 102, 0.8));
-  transform: scale(1.2);
-}
-
-/* حقول الإدخال */
-input, textarea, select {
-  background: rgba(255, 255, 255, 0.9) !important;
-  color: var(--theme-text) !important;
-  border: 2px solid transparent !important;
-  border-radius: 1.5rem !important;
-  font-size: 16px;
-  padding: 1rem 1.5rem;
-  box-shadow: 0 8px 16px rgba(255, 51, 102, 0.2);
-  backdrop-filter: blur(10px);
-  position: relative;
-}
-
-input:focus, textarea:focus, select:focus {
-  border-color: var(--theme-primary) !important;
-  box-shadow: 0 0 0 4px rgba(255, 51, 102, 0.2), var(--theme-glow);
-  transform: scale(1.02);
-}
-
-/* تأثيرات الكروت */
-.card-shadow, .shadow-lg, .shadow-2xl {
-  box-shadow: var(--theme-card-shadow) !important;
-  border-radius: var(--theme-card-radius) !important;
-  background: var(--theme-surface) !important;
-  position: relative;
-  overflow: hidden;
-}
-
-.card-shadow::after, .shadow-lg::after, .shadow-2xl::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--theme-gradient-header);
-}
-
-/* العروض المميزة */
-.offer-card {
-  background: var(--theme-gradient-offer) !important;
-  border-radius: 2.5rem !important;
-  box-shadow: 0 25px 50px rgba(255, 51, 102, 0.5) !important;
-  transform: perspective(1000px) rotateX(5deg);
-  position: relative;
-  overflow: hidden;
-}
-
-.offer-card::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  animation: shimmer 3s infinite;
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-}
-
-.offer-card:hover {
-  transform: perspective(1000px) rotateX(10deg) translateY(-20px) scale(1.05);
-  box-shadow: 0 40px 80px rgba(255, 51, 102, 0.7), var(--theme-glow);
+  transform: scale(1.1);
 }
 
 /* شريط التمرير */
-::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar { 
+  width: 6px; 
+}
+
 ::-webkit-scrollbar-thumb { 
   background: var(--theme-gradient-button); 
-  border-radius: 20px; 
-  box-shadow: 0 0 10px rgba(255, 51, 102, 0.5);
+  border-radius: 10px; 
 }
-::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
+
+::-webkit-scrollbar-track { 
+  background: rgba(0, 0, 0, 0.05); 
+}
 
 /* تأثيرات الحركة */
-@keyframes bounce {
-  0%, 20%, 53%, 80%, 100% { transform: translateY(0); }
-  40%, 43% { transform: translateY(-30px); }
-  70% { transform: translateY(-15px); }
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(255, 51, 102, 0.7); }
-  70% { box-shadow: 0 0 0 10px rgba(255, 51, 102, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(255, 51, 102, 0); }
+.animate-slide-up {
+  animation: slideUp 0.6s ease-out;
 }
 
-.animate-bounce { animation: bounce 2s infinite; }
-.animate-pulse { animation: pulse 2s infinite; }
-
-/* تخصيص الشبكة */
+/* الشبكة */
 .grid {
-  gap: 2rem !important;
+  gap: 1.5rem !important;
 }
 
 /* responsive */
 @media (max-width: 768px) {
   .fixed.bottom-0, .sticky.bottom-0 {
-    border-radius: 2rem 2rem 0 0 !important;
+    border-radius: 1.5rem 1.5rem 0 0 !important;
   }
   
-  h1, h2, h3 { font-size: 1.5rem !important; }
+  h1, h2, h3 {
+    font-size: 1.75rem !important;
+  }
   
-  .card-shadow, .shadow-lg, .shadow-2xl {
-    margin: 1rem 0;
+  .text-5xl {
+    font-size: 2.5rem !important;
+  }
+  
+  .text-4xl {
+    font-size: 2rem !important;
   }
 }
 
-/* تأثيرات إضافية للعروض */
-.offer-badge {
-  background: var(--theme-gradient-offer) !important;
-  color: white !important;
-  font-weight: 900 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.1em !important;
-  padding: 0.5rem 1.5rem !important;
-  border-radius: 2rem !important;
-  box-shadow: 0 8px 16px rgba(255, 51, 102, 0.4) !important;
-  animation: pulse 2s infinite !important;
-  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+/* تخصيص العروض */
+.offer-card {
+  background: var(--theme-surface) !important;
+  border-radius: var(--theme-card-radius) !important;
+  box-shadow: var(--theme-card-shadow) !important;
+  overflow: hidden;
 }
 
-.offer-price {
-  background: var(--theme-gradient-button) !important;
-  background-clip: text !important;
-  -webkit-background-clip: text !important;
-  color: transparent !important;
-  font-weight: 900 !important;
-  font-size: 1.8rem !important;
-  text-shadow: 0 2px 4px rgba(255, 51, 102, 0.3) !important;
+.offer-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.3);
 }
 
-.offer-original-price {
-  color: rgba(255, 255, 255, 0.7) !important;
-  text-decoration: line-through !important;
-  font-weight: 600 !important;
+/* ألوان العلامات */
+.bg-red-500 {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+}
+
+.bg-orange-500 {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+}
+
+.bg-green-500 {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+}
+
+.bg-yellow-400 {
+  background: linear-gradient(135deg, #facc15 0%, #eab308 100%) !important;
+}
+
+/* تحسين القراءة */
+.text-5xl {
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-semibold {
+  font-weight: 600;
 }
