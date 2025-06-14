@@ -36,7 +36,7 @@ const CartScreen = () => {
       return;
     }
 
-    const cartItems = cart.map(item => 
+    const cartItems = cart.map(item =>
       `${item.product.name} - الكمية: ${item.quantity} - السعر: ${item.product.price * item.quantity} ر.س`
     ).join('\n');
 
@@ -54,7 +54,8 @@ ${cartItems}
 📝 ملاحظات: ${orderInfo.notes || 'لا توجد ملاحظات'}
     `;
 
-    const phoneNumber = '966553624564';
+    // رقم الواتساب الجديد 
+    const phoneNumber = '201204486263';
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     
     window.open(whatsappUrl, '_blank');
