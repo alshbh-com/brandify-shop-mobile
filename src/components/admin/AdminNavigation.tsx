@@ -41,7 +41,7 @@ const AdminNavigation = ({ activeTab, onTabChange }: AdminNavigationProps) => {
             >
               <Icon size={16} />
               {tab.label}
-            </Button>
+            </button>
           );
         })}
       </div>
