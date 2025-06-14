@@ -23,6 +23,7 @@ import OfferForm from './admin/forms/OfferForm';
 import RatingForm from './admin/forms/RatingForm';
 import AdminCouponsTab from './admin/AdminCouponsTab';
 import CouponForm from './admin/forms/CouponForm';
+import AdminUsersTab from './admin/AdminUsersTab';
 import { supabase } from '@/integrations/supabase/client';
 
 const AdminPanel = () => {
@@ -330,7 +331,6 @@ const AdminPanel = () => {
     <div className="min-h-screen bg-gray-50 pb-20">
       <AdminHeader onLogout={adminLogout} />
       <AdminNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-
       <div className="p-4">
         {activeTab === 'store' && (
           <StoreSettingsTab
@@ -421,6 +421,10 @@ const AdminPanel = () => {
             }}
             onDeleteCoupon={handleDeleteCoupon}
           />
+        )}
+
+        {activeTab === 'users' && (
+          <AdminUsersTab />
         )}
       </div>
 

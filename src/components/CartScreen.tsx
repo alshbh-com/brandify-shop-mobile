@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/contexts/AppContext';
 import { Minus, Plus, Trash2, ShoppingBag, Phone, MapPin, User, MessageSquare } from 'lucide-react';
+import { supabase } from "@/integrations/supabase/client";
 
 const CartScreen = () => {
   const [showCheckout, setShowCheckout] = useState(false);
@@ -13,6 +14,10 @@ const CartScreen = () => {
     address: '',
     notes: ''
   });
+  const [couponCode, setCouponCode] = useState("");
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [discount, setDiscount] = useState(0);
 
   const { 
     cart, 
@@ -22,7 +27,52 @@ const CartScreen = () => {
     user 
   } = useApp();
 
+  const handleApplyCoupon = async () => {
+    setCouponError(null);
+    setAppliedCoupon(null);
+    setDiscount(0);
+
+    if (!couponCode.trim()) {
+      setCouponError("الرجاء إدخال كود الكوبون");
+      return;
+    }
+    // (في التطبيق الواقعي: يجب جلب الكوبون من قاعدة البيانات والتحقق منه)
+    const { data: coupons } = await supabase
+      .from("coupons")
+      .select("*")
+      .eq("code", couponCode.trim().toUpperCase());
+    const coupon = (coupons && coupons[0]) ? coupons[0] : null;
+    if (!coupon) {
+      setCouponError("الكوبون غير صالح");
+      return;
+    }
+    // تحقق من الصلاحية والتاريخ وعدد الاستخدام, ...الخ
+    const now = new Date();
+    if (new Date(coupon.start_date) > now || new Date(coupon.end_date) < now) {
+      setCouponError("الكوبون غير صالح أو منتهي");
+      return;
+    }
+    // تحقق من عدد مرات الاستخدام (لكل عميل)
+    const { data: used } = await supabase
+      .from("coupon_usages")
+      .select("id")
+      .eq("coupon_id", coupon.id)
+      .eq("user_id", supabase.auth?.user()?.id);
+    if (used && used.length >= coupon.max_usage) {
+      setCouponError("لقد استخدمت الكوبون الحد الأقصى المسموح");
+      return;
+    }
+    // إذا وصلنا هنا فالكوبون صالح
+    setAppliedCoupon(coupon);
+    setDiscount(coupon.discount_percent);
+    setCouponError(null);
+
+    // عند إتمام الطلب (عند عملية الدفع) سجل الاستخدام
+    // await supabase.from("coupon_usages").insert([{ coupon_id: coupon.id, user_id: supabase.auth.user().id }]);
+  };
+
   const total = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  const discountedTotal = discount > 0 ? total * (1 - discount / 100) : total;
 
   const handleCheckout = () => {
     if (cart.length === 0) {
@@ -172,6 +222,31 @@ ${cartItems}
             سلة التسوق
           </h1>
         </div>
+      </div>
+      
+      <div className="my-4 bg-white p-4 rounded shadow">
+        <label className="block mb-2 font-bold">كود الكوبون</label>
+        <div className="flex gap-2">
+          <input
+            className="border rounded px-3 py-2 outline-none"
+            type="text"
+            value={couponCode}
+            onChange={e => setCouponCode(e.target.value)}
+            placeholder="ادخل كود الكوبون"
+          />
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+            onClick={handleApplyCoupon}
+          >تطبيق الكوبون</button>
+        </div>
+        {couponError && <div className="mt-1 text-red-500">{couponError}</div>}
+        {appliedCoupon && !couponError && (
+          <div className="mt-1 text-green-700 font-bold">تم تطبيق الكوبون - خصم {appliedCoupon.discount_percent}%</div>
+        )}
+      </div>
+      <div>
+        <p>الإجمالي الأصلي: <b>{total}</b> جنيه</p>
+        {discount > 0 && <p>الإجمالي بعد الخصم: <b>{discountedTotal}</b> جنيه</p>}
       </div>
       
       {cart.length === 0 ? (

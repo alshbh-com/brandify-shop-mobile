@@ -15,7 +15,8 @@ const AdminNavigation = ({ activeTab, onTabChange }: AdminNavigationProps) => {
     { id: 'offers', label: 'العروض' },
     { id: 'favorites', label: 'المفضلة' },
     { id: 'ratings', label: 'التقييمات' },
-    { id: 'coupons', label: 'الكوبونات' }, // <--- تمت إضافة تبويب الكوبونات
+    { id: 'coupons', label: 'الكوبونات' },
+    { id: 'users', label: 'المستخدمين/التجار' }, // إضافة تبويب جديد
   ];
 
   return (
@@ -38,5 +39,4 @@ const AdminNavigation = ({ activeTab, onTabChange }: AdminNavigationProps) => {
     </div>
   );
 };
-
 export default AdminNavigation;
