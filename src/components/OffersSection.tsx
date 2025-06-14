@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useApp } from '@/contexts/AppContext';
 import { useOffers } from '@/hooks/useOffers';
-import { Star, Zap, Clock } from 'lucide-react';
+import { Star, Zap, Clock, Gift, Percent } from 'lucide-react';
 
 const OffersSection = () => {
   const { products, addToCart } = useApp();
@@ -26,87 +26,117 @@ const OffersSection = () => {
 
   return (
     <div className="px-6 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-r from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center">
-            <Zap className="w-6 h-6 text-white" />
+      {/* عنوان مميز للعروض */}
+      <div className="text-center mb-8 relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-pink-500/20 to-transparent blur-xl"></div>
+        <div className="relative">
+          <div className="inline-flex items-center gap-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-4 rounded-3xl shadow-2xl animate-bounce mb-4">
+            <Zap className="w-8 h-8" />
+            <h2 className="text-3xl font-black text-white">عروض خاصة</h2>
+            <Gift className="w-8 h-8" />
           </div>
-          <div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-              عروض مميزة
-            </h2>
-            <p className="text-gray-500 text-sm">أفضل العروض الحصرية لك</p>
-          </div>
+          <p className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            🔥 أفضل العروض الحصرية لفترة محدودة! 🔥
+          </p>
         </div>
-        <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white">
-          <Clock className="w-3 h-3 mr-1" />
-          عرض محدود
-        </Badge>
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
+      {/* شبكة العروض */}
+      <div className="grid grid-cols-1 gap-8">
         {activeOffers.map((product: any) => {
           const originalPrice = product.price;
           const discountedPrice = originalPrice * (1 - product.offer.discount_percentage / 100);
+          const savings = originalPrice - discountedPrice;
           
           return (
-            <Card key={product.id} className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 shadow-xl overflow-hidden">
-              <CardContent className="p-0">
-                <div className="flex">
-                  <div className="relative w-32 h-32">
+            <Card key={product.id} className="offer-card overflow-hidden border-0 bg-gradient-to-br from-pink-500 via-purple-600 to-blue-600">
+              <CardContent className="p-0 relative">
+                {/* شريط الخصم المتحرك */}
+                <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 animate-pulse"></div>
+                
+                <div className="flex relative z-10">
+                  {/* صورة المنتج مع تأثيرات */}
+                  <div className="relative w-40 h-40 overflow-hidden">
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
                     />
-                    <div className="absolute top-2 left-2">
-                      <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs">
-                        خصم {product.offer.discount_percentage}%
-                      </Badge>
+                    
+                    {/* شارة الخصم */}
+                    <div className="absolute top-3 left-3">
+                      <div className="offer-badge flex items-center gap-1">
+                        <Percent className="w-4 h-4" />
+                        <span className="text-sm">خصم {product.offer.discount_percentage}%</span>
+                      </div>
                     </div>
-                    <div className="absolute bottom-2 right-2">
-                      <div className="bg-amber-400 text-white rounded-full p-1">
-                        <Star className="w-3 h-3" fill="currentColor" />
+                    
+                    {/* أيقونة النجمة */}
+                    <div className="absolute bottom-3 right-3">
+                      <div className="bg-yellow-400 text-yellow-900 rounded-full p-2 shadow-lg animate-pulse">
+                        <Star className="w-4 h-4" fill="currentColor" />
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex-1 p-4 flex flex-col justify-between">
-                    <div>
-                      <h3 className="font-bold text-lg text-gray-800 mb-1">
+                  {/* محتوى المنتج */}
+                  <div className="flex-1 p-6 text-white">
+                    <div className="mb-4">
+                      <h3 className="font-black text-2xl text-white mb-2 drop-shadow-lg">
                         {product.name}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-3">
-                        {product.description || 'منتج مميز بجودة عالية'}
+                      <p className="text-white/90 text-sm mb-3 font-medium">
+                        {product.description || 'منتج مميز بجودة عالية وخصم استثنائي'}
                       </p>
-                      <p className="text-xs text-gray-500">
-                        العرض ينتهي في: {new Date(product.offer.end_date).toLocaleDateString('ar')}
-                      </p>
+                      
+                      {/* مؤقت العرض */}
+                      <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-xl px-3 py-2 mb-4">
+                        <Clock className="w-4 h-4 text-red-300 animate-pulse" />
+                        <span className="text-sm font-bold text-white">
+                          ينتهي في: {new Date(product.offer.end_date).toLocaleDateString('ar')}
+                        </span>
+                      </div>
                     </div>
                     
+                    {/* الأسعار والزر */}
                     <div className="flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <span className="text-sm text-gray-500 line-through">
-                          {originalPrice.toFixed(2)} ر.س
-                        </span>
-                        <span className="text-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-3">
+                          <span className="offer-original-price text-lg">
+                            {originalPrice.toFixed(2)} ر.س
+                          </span>
+                          <Badge className="bg-red-500 text-white px-2 py-1 text-xs">
+                            وفر {savings.toFixed(2)} ر.س
+                          </Badge>
+                        </div>
+                        <div className="offer-price text-4xl font-black text-white drop-shadow-lg">
                           {discountedPrice.toFixed(2)} ر.س
-                        </span>
+                        </div>
                       </div>
                       
                       <button
                         onClick={() => addToCart({ ...product, price: discountedPrice })}
-                        className="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white px-6 py-2 rounded-2xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                        className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white px-8 py-4 rounded-2xl font-black shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 hover:-translate-y-2 text-lg"
                       >
-                        أضف للسلة
+                        🛒 أضف للسلة
                       </button>
                     </div>
                   </div>
                 </div>
+                
+                {/* تأثيرات الخلفية */}
+                <div className="absolute inset-0 bg-gradient-to-br from-pink-500/20 via-purple-600/20 to-blue-600/20 animate-pulse"></div>
               </CardContent>
             </Card>
           );
         })}
+      </div>
+      
+      {/* رسالة تحفيزية */}
+      <div className="text-center mt-8">
+        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-400 to-blue-500 text-white px-6 py-3 rounded-full shadow-lg animate-pulse">
+          <span className="text-lg font-bold">⚡ اطلب الآن قبل انتهاء العروض! ⚡</span>
+        </div>
       </div>
     </div>
   );
