@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useApp } from '@/contexts/AppContext';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 const AuthScreen = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -11,7 +13,10 @@ const AuthScreen = () => {
     name: '',
     email: '',
     password: '',
-    birthDate: ''
+    birthDate: '',
+    userType: 'user', // 'user' or 'merchant'
+    whatsappNumber: '',
+    storeName: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -28,14 +33,23 @@ const AuthScreen = () => {
         await signIn(formData.email, formData.password);
       } else {
         if (!formData.name || !formData.email || !formData.password || !formData.birthDate) {
-          setError('يرجى ملء جميع الحقول');
+          setError('يرجى ملء جميع الحقول المطلوبة');
+          return;
+        }
+
+        if (formData.userType === 'merchant' && !formData.whatsappNumber) {
+          setError('يرجى إدخال رقم الواتساب للتجار');
           return;
         }
         
-        await signUp(formData.name, formData.email, formData.password, formData.birthDate);
+        await signUp(formData.name, formData.email, formData.password, formData.birthDate, {
+          userType: formData.userType,
+          whatsappNumber: formData.whatsappNumber,
+          storeName: formData.storeName
+        });
         setError('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول');
         setIsLogin(true);
-        setFormData({ name: '', email: '', password: '', birthDate: '' });
+        setFormData({ name: '', email: '', password: '', birthDate: '', userType: 'user', whatsappNumber: '', storeName: '' });
       }
     } catch (error: any) {
       console.error('Auth error:', error);
@@ -81,17 +95,63 @@ const AuthScreen = () => {
           
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">الاسم</label>
-                <Input
-                  type="text"
-                  placeholder="أدخل اسمك"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  className="border-gray-200 focus:border-blue-500 transition-colors"
-                  required
-                />
-              </div>
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">الاسم</label>
+                  <Input
+                    type="text"
+                    placeholder="أدخل اسمك"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    className="border-gray-200 focus:border-blue-500 transition-colors"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-gray-700">نوع الحساب</label>
+                  <RadioGroup 
+                    value={formData.userType} 
+                    onValueChange={(value) => handleInputChange('userType', value)}
+                    className="flex flex-col space-y-2"
+                  >
+                    <div className="flex items-center space-x-2 space-x-reverse">
+                      <RadioGroupItem value="user" id="user" />
+                      <Label htmlFor="user">مستخدم عادي</Label>
+                    </div>
+                    <div className="flex items-center space-x-2 space-x-reverse">
+                      <RadioGroupItem value="merchant" id="merchant" />
+                      <Label htmlFor="merchant">تاجر</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                {formData.userType === 'merchant' && (
+                  <>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">رقم الواتساب *</label>
+                      <Input
+                        type="text"
+                        placeholder="مثال: 20XXXXXXXXX"
+                        value={formData.whatsappNumber}
+                        onChange={(e) => handleInputChange('whatsappNumber', e.target.value)}
+                        className="border-gray-200 focus:border-blue-500 transition-colors"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">اسم المتجر (اختياري)</label>
+                      <Input
+                        type="text"
+                        placeholder="أدخل اسم متجرك"
+                        value={formData.storeName}
+                        onChange={(e) => handleInputChange('storeName', e.target.value)}
+                        className="border-gray-200 focus:border-blue-500 transition-colors"
+                      />
+                    </div>
+                  </>
+                )}
+              </>
             )}
             
             <div className="space-y-2">
@@ -145,7 +205,7 @@ const AuthScreen = () => {
             <button
               onClick={() => {
                 setIsLogin(!isLogin);
-                setFormData({ name: '', email: '', password: '', birthDate: '' });
+                setFormData({ name: '', email: '', password: '', birthDate: '', userType: 'user', whatsappNumber: '', storeName: '' });
                 setError('');
               }}
               className="text-blue-600 hover:text-blue-700 transition-colors text-sm font-medium"

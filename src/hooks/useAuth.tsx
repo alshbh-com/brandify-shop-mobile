@@ -39,7 +39,7 @@ export const useAuth = () => {
     return age;
   };
 
-  const signUp = async (name: string, email: string, password: string, birthDate: string) => {
+  const signUp = async (name: string, email: string, password: string, birthDate: string, additionalData?: any) => {
     const age = calculateAge(birthDate);
     if (age < 18) {
       throw new Error('عذراً، يجب أن يكون عمرك 18 عاماً أو أكثر للتسجيل');
@@ -51,12 +51,41 @@ export const useAuth = () => {
       options: {
         data: {
           name,
-          birth_date: birthDate
+          birth_date: birthDate,
+          user_type: additionalData?.userType || 'user',
+          whatsapp_number: additionalData?.whatsappNumber || '',
+          store_name: additionalData?.storeName || ''
         }
       }
     });
 
     if (error) throw error;
+
+    // إذا تم إنشاء المستخدم بنجاح، قم بإنشاء البروفايل وإضافة الأدوار
+    if (data.user) {
+      // إنشاء البروفايل
+      await supabase.from('profiles').upsert({
+        id: data.user.id,
+        name,
+        birth_date: birthDate,
+        whatsapp_number: additionalData?.whatsappNumber || null,
+        merchant_status: additionalData?.userType === 'merchant' ? 'pending' : null
+      });
+
+      // إضافة الدور المناسب
+      if (additionalData?.userType === 'merchant') {
+        await supabase.from('user_roles').insert({
+          user_id: data.user.id,
+          role: 'merchant'
+        });
+      } else {
+        await supabase.from('user_roles').insert({
+          user_id: data.user.id,
+          role: 'user'
+        });
+      }
+    }
+
     return data;
   };
 
