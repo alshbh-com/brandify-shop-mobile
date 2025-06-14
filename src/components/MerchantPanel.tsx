@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,7 +21,11 @@ const MerchantPanel = () => {
     price: '',
     category_id: '',
     description: '',
-    image: ''
+    image: '',
+    has_sizes: false,
+    size_s_price: '',
+    size_m_price: '',
+    size_l_price: ''
   });
 
   const { user, logout, categories } = useApp();
@@ -65,7 +68,11 @@ const MerchantPanel = () => {
       category_id: productForm.category_id,
       description: productForm.description,
       image: productForm.image || '/placeholder.svg',
-      merchant_id: user?.id
+      merchant_id: user?.id,
+      has_sizes: productForm.has_sizes,
+      size_s_price: productForm.size_s_price ? parseFloat(productForm.size_s_price) : null,
+      size_m_price: productForm.size_m_price ? parseFloat(productForm.size_m_price) : null,
+      size_l_price: productForm.size_l_price ? parseFloat(productForm.size_l_price) : null
     };
 
     try {
@@ -75,7 +82,17 @@ const MerchantPanel = () => {
       } else {
         await addProduct(productData);
       }
-      setProductForm({ name: '', price: '', category_id: '', description: '', image: '' });
+      setProductForm({
+        name: '',
+        price: '',
+        category_id: '',
+        description: '',
+        image: '',
+        has_sizes: false,
+        size_s_price: '',
+        size_m_price: '',
+        size_l_price: ''
+      });
       setShowProductForm(false);
     } catch (error) {
       alert('حدث خطأ أثناء حفظ المنتج');
@@ -89,7 +106,11 @@ const MerchantPanel = () => {
       price: product.price.toString(),
       category_id: product.category_id,
       description: product.description || '',
-      image: product.image
+      image: product.image,
+      has_sizes: product.has_sizes || false,
+      size_s_price: product.size_s_price ? product.size_s_price.toString() : '',
+      size_m_price: product.size_m_price ? product.size_m_price.toString() : '',
+      size_l_price: product.size_l_price ? product.size_l_price.toString() : ''
     });
     setShowProductForm(true);
   };
@@ -202,7 +223,30 @@ const MerchantPanel = () => {
                         <p className="text-sm text-gray-500">
                           {getCategoryName(product.category_id)}
                         </p>
-                        <p className="text-blue-600 font-bold">{product.price} ر.س</p>
+                        <p className="text-blue-600 font-bold">{product.price} ج.م</p>
+                        
+                        {/* عرض أسعار الأحجام إذا كانت متوفرة */}
+                        {product.has_sizes && (
+                          <div className="mt-1">
+                            <div className="flex gap-2">
+                              {product.size_s_price && (
+                                <Badge variant="outline" className="text-xs">
+                                  S: {product.size_s_price} ج.م
+                                </Badge>
+                              )}
+                              {product.size_m_price && (
+                                <Badge variant="outline" className="text-xs">
+                                  M: {product.size_m_price} ج.م
+                                </Badge>
+                              )}
+                              {product.size_l_price && (
+                                <Badge variant="outline" className="text-xs">
+                                  L: {product.size_l_price} ج.م
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                       <div className="flex gap-2">
                         <Button
@@ -265,7 +309,7 @@ const MerchantPanel = () => {
                         <p className="text-sm text-gray-500">
                           {getCategoryName(request.product_category_id)}
                         </p>
-                        <p className="text-blue-600 font-bold">{request.product_price} ر.س</p>
+                        <p className="text-blue-600 font-bold">{request.product_price} ج.م</p>
                         <p className="text-xs text-gray-400">
                           {new Date(request.created_at).toLocaleDateString('ar')}
                         </p>
@@ -296,7 +340,17 @@ const MerchantPanel = () => {
         onClose={() => {
           setShowProductForm(false);
           setEditingProduct(null);
-          setProductForm({ name: '', price: '', category_id: '', description: '', image: '' });
+          setProductForm({
+            name: '',
+            price: '',
+            category_id: '',
+            description: '',
+            image: '',
+            has_sizes: false,
+            size_s_price: '',
+            size_m_price: '',
+            size_l_price: ''
+          });
         }}
         onSubmit={handleProductSubmit}
         onFormChange={(updates) => setProductForm(prev => ({ ...prev, ...updates }))}

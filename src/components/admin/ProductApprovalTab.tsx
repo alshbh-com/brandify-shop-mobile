@@ -33,7 +33,11 @@ const ProductApprovalTab = ({
           category_id: request.product_category_id,
           description: request.product_description,
           image: request.product_image,
-          merchant_id: request.merchant_id
+          merchant_id: request.merchant_id,
+          has_sizes: request.has_sizes || false,
+          size_s_price: request.size_s_price,
+          size_m_price: request.size_m_price,
+          size_l_price: request.size_l_price
         }]);
 
       if (productError) throw productError;
@@ -116,7 +120,32 @@ const ProductApprovalTab = ({
                   <p className="text-sm text-gray-500">
                     {getCategoryName(request.product_category_id)}
                   </p>
-                  <p className="text-blue-600 font-bold">{request.product_price} ر.س</p>
+                  <p className="text-blue-600 font-bold">{request.product_price} ج.م</p>
+                  
+                  {/* عرض أسعار الأحجام إذا كانت متوفرة */}
+                  {request.has_sizes && (
+                    <div className="mt-2">
+                      <p className="text-xs text-orange-600 font-medium">أحجام متعددة:</p>
+                      <div className="flex gap-2 mt-1">
+                        {request.size_s_price && (
+                          <Badge variant="outline" className="text-xs">
+                            S: {request.size_s_price} ج.م
+                          </Badge>
+                        )}
+                        {request.size_m_price && (
+                          <Badge variant="outline" className="text-xs">
+                            M: {request.size_m_price} ج.م
+                          </Badge>
+                        )}
+                        {request.size_l_price && (
+                          <Badge variant="outline" className="text-xs">
+                            L: {request.size_l_price} ج.م
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
                   <p className="text-xs text-gray-400">
                     {new Date(request.created_at).toLocaleDateString('ar')}
                   </p>

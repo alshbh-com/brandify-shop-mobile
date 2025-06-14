@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,7 @@ const ProductGrid = ({ products, getCategoryName }: ProductGridProps) => {
   const { addToCart } = useApp();
   const { favorites } = useFavorites();
   const { ratings } = useRatings();
+  const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>({});
 
   const isFavorite = (productId: string) => {
     return favorites.some(f => f.product_id === productId);
@@ -29,12 +31,48 @@ const ProductGrid = ({ products, getCategoryName }: ProductGridProps) => {
     return ratings.find(r => r.product_id === productId);
   };
 
+  const handleSizeSelect = (productId: string, size: string) => {
+    setSelectedSizes(prev => ({ ...prev, [productId]: size }));
+  };
+
+  const getProductPrice = (product: any, selectedSize?: string) => {
+    if (!product.has_sizes || !selectedSize) {
+      return product.price;
+    }
+    
+    switch (selectedSize) {
+      case 'S':
+        return product.size_s_price || product.price;
+      case 'M':
+        return product.size_m_price || product.price;
+      case 'L':
+        return product.size_l_price || product.price;
+      default:
+        return product.price;
+    }
+  };
+
+  const handleAddToCart = (product: any) => {
+    const selectedSize = selectedSizes[product.id];
+    const finalPrice = getProductPrice(product, selectedSize);
+    
+    const productToAdd = {
+      ...product,
+      price: finalPrice,
+      selectedSize: selectedSize || null
+    };
+    
+    addToCart(productToAdd);
+  };
+
   return (
     <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {products.map((product, index) => {
         const productRating = getProductRating(product.id);
         const isProductFavorite = isFavorite(product.id);
         const isProductFeatured = isFeatured(product.id);
+        const selectedSize = selectedSizes[product.id];
+        const displayPrice = getProductPrice(product, selectedSize);
 
         return (
           <Card key={product.id} className="group bg-white shadow-lg border-0 overflow-hidden rounded-3xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2">
@@ -57,6 +95,11 @@ const ProductGrid = ({ products, getCategoryName }: ProductGridProps) => {
                   {isProductFeatured && (
                     <Badge className="bg-gradient-to-r from-purple-400 to-pink-500 text-white border-0 shadow-lg">
                       مميز
+                    </Badge>
+                  )}
+                  {product.has_sizes && (
+                    <Badge className="bg-gradient-to-r from-orange-400 to-red-500 text-white border-0 shadow-lg">
+                      أحجام متعددة
                     </Badge>
                   )}
                 </div>
@@ -100,17 +143,62 @@ const ProductGrid = ({ products, getCategoryName }: ProductGridProps) => {
                     </p>
                   )}
                 </div>
+
+                {/* خيارات الأحجام */}
+                {product.has_sizes && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-gray-700">اختر الحجم:</p>
+                    <div className="flex gap-1">
+                      {product.size_s_price && (
+                        <button
+                          onClick={() => handleSizeSelect(product.id, 'S')}
+                          className={`px-2 py-1 text-xs rounded-full border transition-colors ${
+                            selectedSize === 'S'
+                              ? 'bg-blue-500 text-white border-blue-500'
+                              : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'
+                          }`}
+                        >
+                          S - {product.size_s_price} ج.م
+                        </button>
+                      )}
+                      {product.size_m_price && (
+                        <button
+                          onClick={() => handleSizeSelect(product.id, 'M')}
+                          className={`px-2 py-1 text-xs rounded-full border transition-colors ${
+                            selectedSize === 'M'
+                              ? 'bg-blue-500 text-white border-blue-500'
+                              : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'
+                          }`}
+                        >
+                          M - {product.size_m_price} ج.م
+                        </button>
+                      )}
+                      {product.size_l_price && (
+                        <button
+                          onClick={() => handleSizeSelect(product.id, 'L')}
+                          className={`px-2 py-1 text-xs rounded-full border transition-colors ${
+                            selectedSize === 'L'
+                              ? 'bg-blue-500 text-white border-blue-500'
+                              : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'
+                          }`}
+                        >
+                          L - {product.size_l_price} ج.م
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
                 
                 <div className="flex items-center justify-between pt-2">
                   <div className="flex flex-col">
                     <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                      {product.price} ج.م
+                      {displayPrice} ج.م
                     </span>
                     <span className="text-xs text-gray-400">شامل الضريبة</span>
                   </div>
                   
                   <Button
-                    onClick={() => addToCart(product)}
+                    onClick={() => handleAddToCart(product)}
                     size="sm"
                     className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-2xl w-12 h-12 p-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 group-hover:animate-pulse"
                   >

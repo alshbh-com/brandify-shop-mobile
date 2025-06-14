@@ -26,7 +26,11 @@ const MerchantProductApprovalForm = ({
     product_price: '',
     product_category_id: '',
     product_description: '',
-    product_image: ''
+    product_image: '',
+    has_sizes: false,
+    size_s_price: '',
+    size_m_price: '',
+    size_l_price: ''
   });
   const [loading, setLoading] = useState(false);
 
@@ -48,13 +52,27 @@ const MerchantProductApprovalForm = ({
           product_category_id: form.product_category_id,
           product_description: form.product_description,
           product_image: form.product_image || '/placeholder.svg',
+          has_sizes: form.has_sizes,
+          size_s_price: form.size_s_price ? parseFloat(form.size_s_price) : null,
+          size_m_price: form.size_m_price ? parseFloat(form.size_m_price) : null,
+          size_l_price: form.size_l_price ? parseFloat(form.size_l_price) : null,
           status: 'pending'
         }]);
 
       if (error) throw error;
 
       alert('تم إرسال طلب الموافقة على المنتج بنجاح! سيتم مراجعته من قبل المدير.');
-      setForm({ product_name: '', product_price: '', product_category_id: '', product_description: '', product_image: '' });
+      setForm({
+        product_name: '',
+        product_price: '',
+        product_category_id: '',
+        product_description: '',
+        product_image: '',
+        has_sizes: false,
+        size_s_price: '',
+        size_m_price: '',
+        size_l_price: ''
+      });
       onClose();
       onSuccess();
     } catch (error) {
@@ -108,13 +126,61 @@ const MerchantProductApprovalForm = ({
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-1">السعر *</label>
+              <label className="block text-sm font-medium mb-1">السعر الأساسي *</label>
               <Input
                 type="number"
                 value={form.product_price}
                 onChange={(e) => setForm(prev => ({ ...prev, product_price: e.target.value }))}
                 required
               />
+            </div>
+
+            {/* خيارات الأحجام */}
+            <div className="border rounded-lg p-3 bg-gray-50">
+              <div className="flex items-center mb-3">
+                <input
+                  type="checkbox"
+                  id="has_sizes"
+                  checked={form.has_sizes}
+                  onChange={(e) => setForm(prev => ({ ...prev, has_sizes: e.target.checked }))}
+                  className="ml-2"
+                />
+                <label htmlFor="has_sizes" className="text-sm font-medium">
+                  إضافة أحجام مختلفة (صغير، وسط، كبير)
+                </label>
+              </div>
+              
+              {form.has_sizes && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">سعر الحجم الصغير (S)</label>
+                    <Input
+                      type="number"
+                      value={form.size_s_price}
+                      onChange={(e) => setForm(prev => ({ ...prev, size_s_price: e.target.value }))}
+                      placeholder="اختياري"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">سعر الحجم الوسط (M)</label>
+                    <Input
+                      type="number"
+                      value={form.size_m_price}
+                      onChange={(e) => setForm(prev => ({ ...prev, size_m_price: e.target.value }))}
+                      placeholder="اختياري"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">سعر الحجم الكبير (L)</label>
+                    <Input
+                      type="number"
+                      value={form.size_l_price}
+                      onChange={(e) => setForm(prev => ({ ...prev, size_l_price: e.target.value }))}
+                      placeholder="اختياري"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
             
             <div>

@@ -53,13 +53,61 @@ const MerchantProductForm = ({
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-1">السعر *</label>
+              <label className="block text-sm font-medium mb-1">السعر الأساسي *</label>
               <Input
                 type="number"
                 value={form.price}
                 onChange={(e) => onFormChange({ price: e.target.value })}
                 required
               />
+            </div>
+
+            {/* خيارات الأحجام */}
+            <div className="border rounded-lg p-3 bg-gray-50">
+              <div className="flex items-center mb-3">
+                <input
+                  type="checkbox"
+                  id="has_sizes"
+                  checked={form.has_sizes || false}
+                  onChange={(e) => onFormChange({ has_sizes: e.target.checked })}
+                  className="ml-2"
+                />
+                <label htmlFor="has_sizes" className="text-sm font-medium">
+                  إضافة أحجام مختلفة (صغير، وسط، كبير)
+                </label>
+              </div>
+              
+              {form.has_sizes && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">سعر الحجم الصغير (S)</label>
+                    <Input
+                      type="number"
+                      value={form.size_s_price || ''}
+                      onChange={(e) => onFormChange({ size_s_price: e.target.value })}
+                      placeholder="اختياري"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">سعر الحجم الوسط (M)</label>
+                    <Input
+                      type="number"
+                      value={form.size_m_price || ''}
+                      onChange={(e) => onFormChange({ size_m_price: e.target.value })}
+                      placeholder="اختياري"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">سعر الحجم الكبير (L)</label>
+                    <Input
+                      type="number"
+                      value={form.size_l_price || ''}
+                      onChange={(e) => onFormChange({ size_l_price: e.target.value })}
+                      placeholder="اختياري"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
             
             <div>

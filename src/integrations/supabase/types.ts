@@ -217,6 +217,7 @@ export type Database = {
         Row: {
           admin_notes: string | null
           created_at: string
+          has_sizes: boolean | null
           id: string
           merchant_id: string
           product_category_id: string | null
@@ -224,12 +225,16 @@ export type Database = {
           product_image: string | null
           product_name: string
           product_price: number
+          size_l_price: number | null
+          size_m_price: number | null
+          size_s_price: number | null
           status: string
           updated_at: string
         }
         Insert: {
           admin_notes?: string | null
           created_at?: string
+          has_sizes?: boolean | null
           id?: string
           merchant_id: string
           product_category_id?: string | null
@@ -237,12 +242,16 @@ export type Database = {
           product_image?: string | null
           product_name: string
           product_price: number
+          size_l_price?: number | null
+          size_m_price?: number | null
+          size_s_price?: number | null
           status?: string
           updated_at?: string
         }
         Update: {
           admin_notes?: string | null
           created_at?: string
+          has_sizes?: boolean | null
           id?: string
           merchant_id?: string
           product_category_id?: string | null
@@ -250,6 +259,9 @@ export type Database = {
           product_image?: string | null
           product_name?: string
           product_price?: number
+          size_l_price?: number | null
+          size_m_price?: number | null
+          size_s_price?: number | null
           status?: string
           updated_at?: string
         }
@@ -268,33 +280,45 @@ export type Database = {
           category_id: string | null
           created_at: string | null
           description: string | null
+          has_sizes: boolean | null
           id: string
           image: string | null
           merchant_id: string | null
           name: string
           price: number
+          size_l_price: number | null
+          size_m_price: number | null
+          size_s_price: number | null
           updated_at: string | null
         }
         Insert: {
           category_id?: string | null
           created_at?: string | null
           description?: string | null
+          has_sizes?: boolean | null
           id?: string
           image?: string | null
           merchant_id?: string | null
           name: string
           price: number
+          size_l_price?: number | null
+          size_m_price?: number | null
+          size_s_price?: number | null
           updated_at?: string | null
         }
         Update: {
           category_id?: string | null
           created_at?: string | null
           description?: string | null
+          has_sizes?: boolean | null
           id?: string
           image?: string | null
           merchant_id?: string | null
           name?: string
           price?: number
+          size_l_price?: number | null
+          size_m_price?: number | null
+          size_s_price?: number | null
           updated_at?: string | null
         }
         Relationships: [
