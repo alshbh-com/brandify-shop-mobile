@@ -17,6 +17,7 @@ import CategoriesTab from './admin/CategoriesTab';
 import OffersTab from './admin/OffersTab';
 import FavoritesTab from './admin/FavoritesTab';
 import RatingsTab from './admin/RatingsTab';
+import ProductApprovalTab from './admin/ProductApprovalTab';
 import ProductForm from './admin/forms/ProductForm';
 import CategoryForm from './admin/forms/CategoryForm';
 import OfferForm from './admin/forms/OfferForm';
@@ -40,12 +41,13 @@ const AdminPanel = () => {
   const [coupons, setCoupons] = useState<any[]>([]);
   const [showCouponForm, setShowCouponForm] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState<any>(null);
+  const [approvalRequests, setApprovalRequests] = useState<any[]>([]);
   const [couponForm, setCouponForm] = useState({
     code: '',
     discount_percent: '',
     start_date: '',
     end_date: '',
-    max_usage: '', // Use string to match controlled input
+    max_usage: '',
   });
 
   const [productForm, setProductForm] = useState({
@@ -108,18 +110,32 @@ const AdminPanel = () => {
     return () => clearTimeout(timer);
   }, [localStoreName, storeName, updateStoreName]);
 
-  // -------------- NEW: إدارة الكوبونات بشكل فعلي مع Supabase --------------
   useEffect(() => {
-    // جلب الكوبونات من Supabase
-    async function fetchCoupons() {
-      const { data, error } = await supabase
-        .from("coupons")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (!error && data) setCoupons(data);
-    }
+    fetchApprovalRequests();
     fetchCoupons();
   }, []);
+
+  const fetchApprovalRequests = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('product_approval_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setApprovalRequests(data || []);
+    } catch (error) {
+      console.error('Error fetching approval requests:', error);
+    }
+  };
+
+  const fetchCoupons = async () => {
+    const { data, error } = await supabase
+      .from("coupons")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (!error && data) setCoupons(data);
+  };
 
   const handleCouponSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -431,6 +447,14 @@ const AdminPanel = () => {
               setShowCouponForm(true);
             }}
             onDeleteCoupon={handleDeleteCoupon}
+          />
+        )}
+
+        {activeTab === 'approvals' && (
+          <ProductApprovalTab
+            approvalRequests={approvalRequests}
+            categories={categories}
+            onRefresh={fetchApprovalRequests}
           />
         )}
 

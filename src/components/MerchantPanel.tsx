@@ -3,17 +3,20 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { useApp } from '@/contexts/AppContext';
 import { useProducts } from '@/hooks/useProducts';
-import { Plus, Edit, Trash2, Upload, X, Package, Tag, LogOut } from 'lucide-react';
+import { Plus, Edit, Trash2, Package, LogOut, Clock, CheckCircle, XCircle } from 'lucide-react';
 import MerchantProductForm from './merchant/MerchantProductForm';
-import MerchantOfferRequestForm from './merchant/MerchantOfferRequestForm';
+import MerchantProductApprovalForm from './merchant/MerchantProductApprovalForm';
+import { supabase } from '@/integrations/supabase/client';
 
 const MerchantPanel = () => {
   const [activeTab, setActiveTab] = useState('products');
   const [showProductForm, setShowProductForm] = useState(false);
-  const [showOfferForm, setShowOfferForm] = useState(false);
+  const [showApprovalForm, setShowApprovalForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [approvalRequests, setApprovalRequests] = useState<any[]>([]);
   const [productForm, setProductForm] = useState({
     name: '',
     price: '',
@@ -25,8 +28,29 @@ const MerchantPanel = () => {
   const { user, logout, categories } = useApp();
   const { products, addProduct, updateProduct, deleteProduct } = useProducts();
 
-  // Filter products for current merchant
+  // Filter products for current merchant (approved products only)
   const merchantProducts = products.filter(p => p.merchant_id === user?.id);
+
+  useEffect(() => {
+    if (user) {
+      fetchApprovalRequests();
+    }
+  }, [user]);
+
+  const fetchApprovalRequests = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('product_approval_requests')
+        .select('*')
+        .eq('merchant_id', user?.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setApprovalRequests(data || []);
+    } catch (error) {
+      console.error('Error fetching approval requests:', error);
+    }
+  };
 
   const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,6 +112,24 @@ const MerchantPanel = () => {
     }
   };
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="outline" className="text-yellow-600 border-yellow-200"><Clock size={12} className="ml-1" />قيد المراجعة</Badge>;
+      case 'approved':
+        return <Badge variant="outline" className="text-green-600 border-green-200"><CheckCircle size={12} className="ml-1" />موافق عليه</Badge>;
+      case 'rejected':
+        return <Badge variant="outline" className="text-red-600 border-red-200"><XCircle size={12} className="ml-1" />مرفوض</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const getCategoryName = (categoryId: string) => {
+    const category = categories.find(c => c.id === categoryId);
+    return category ? category.name : 'غير محدد';
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
@@ -116,17 +158,17 @@ const MerchantPanel = () => {
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
-            منتجاتي
+            منتجاتي المعتمدة
           </button>
           <button
-            onClick={() => setActiveTab('offers')}
+            onClick={() => setActiveTab('requests')}
             className={`py-3 px-4 border-b-2 transition-colors whitespace-nowrap ${
-              activeTab === 'offers'
+              activeTab === 'requests'
                 ? 'border-green-500 text-green-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
-            طلب عروض
+            طلبات الموافقة
           </button>
         </div>
       </div>
@@ -135,13 +177,13 @@ const MerchantPanel = () => {
         {activeTab === 'products' && (
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold">إدارة المنتجات</h2>
+              <h2 className="text-xl font-bold">المنتجات المعتمدة</h2>
               <Button
                 onClick={() => setShowProductForm(true)}
                 className="bg-green-500 hover:bg-green-600"
               >
                 <Plus size={16} className="ml-2" />
-                إضافة منتج
+                تعديل منتج معتمد
               </Button>
             </div>
 
@@ -158,7 +200,7 @@ const MerchantPanel = () => {
                       <div className="flex-1">
                         <h3 className="font-semibold">{product.name}</h3>
                         <p className="text-sm text-gray-500">
-                          {categories.find(c => c.id === product.category_id)?.name || 'غير محدد'}
+                          {getCategoryName(product.category_id)}
                         </p>
                         <p className="text-blue-600 font-bold">{product.price} ر.س</p>
                       </div>
@@ -186,27 +228,61 @@ const MerchantPanel = () => {
           </div>
         )}
 
-        {activeTab === 'offers' && (
+        {activeTab === 'requests' && (
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold">طلب عروض</h2>
+              <h2 className="text-xl font-bold">طلبات الموافقة على المنتجات</h2>
               <Button
-                onClick={() => setShowOfferForm(true)}
-                className="bg-orange-500 hover:bg-orange-600"
+                onClick={() => setShowApprovalForm(true)}
+                className="bg-blue-500 hover:bg-blue-600"
               >
-                <Tag size={16} className="ml-2" />
-                طلب عرض جديد
+                <Plus size={16} className="ml-2" />
+                طلب موافقة منتج جديد
               </Button>
             </div>
-            
+
             <Card className="bg-blue-50">
               <CardContent className="p-4">
                 <p className="text-blue-800">
-                  <strong>ملاحظة:</strong> جميع طلبات العروض تحتاج موافقة المدير قبل النشر.
-                  سيتم مراجعة طلبك وإشعارك بالقرار.
+                  <strong>ملاحظة:</strong> جميع المنتجات تحتاج موافقة المدير قبل النشر.
+                  العروض يتم إضافتها من المدير فقط.
                 </p>
               </CardContent>
             </Card>
+
+            <div className="grid gap-4">
+              {approvalRequests.map(request => (
+                <Card key={request.id}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={request.product_image}
+                        alt={request.product_name}
+                        className="w-16 h-16 object-cover rounded-lg"
+                      />
+                      <div className="flex-1">
+                        <h3 className="font-semibold">{request.product_name}</h3>
+                        <p className="text-sm text-gray-500">
+                          {getCategoryName(request.product_category_id)}
+                        </p>
+                        <p className="text-blue-600 font-bold">{request.product_price} ر.س</p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(request.created_at).toLocaleDateString('ar')}
+                        </p>
+                        {request.admin_notes && (
+                          <p className="text-sm text-gray-600 mt-1">
+                            <strong>ملاحظات المدير:</strong> {request.admin_notes}
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-center">
+                        {getStatusBadge(request.status)}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -227,11 +303,12 @@ const MerchantPanel = () => {
         onImageUpload={handleImageUpload}
       />
 
-      {/* Offer Request Form Modal */}
-      <MerchantOfferRequestForm
-        show={showOfferForm}
-        products={merchantProducts}
-        onClose={() => setShowOfferForm(false)}
+      {/* Product Approval Request Form Modal */}
+      <MerchantProductApprovalForm
+        show={showApprovalForm}
+        categories={categories}
+        onClose={() => setShowApprovalForm(false)}
+        onSuccess={fetchApprovalRequests}
       />
     </div>
   );

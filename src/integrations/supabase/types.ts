@@ -122,6 +122,56 @@ export type Database = {
           },
         ]
       }
+      offer_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          discount_percentage: number
+          end_date: string
+          id: string
+          merchant_id: string
+          note: string | null
+          product_id: string | null
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          discount_percentage: number
+          end_date: string
+          id?: string
+          merchant_id: string
+          note?: string | null
+          product_id?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          discount_percentage?: number
+          end_date?: string
+          id?: string
+          merchant_id?: string
+          note?: string | null
+          product_id?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       offers: {
         Row: {
           created_at: string
@@ -163,6 +213,56 @@ export type Database = {
           },
         ]
       }
+      product_approval_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          id: string
+          merchant_id: string
+          product_category_id: string | null
+          product_description: string | null
+          product_image: string | null
+          product_name: string
+          product_price: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          merchant_id: string
+          product_category_id?: string | null
+          product_description?: string | null
+          product_image?: string | null
+          product_name: string
+          product_price: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          merchant_id?: string
+          product_category_id?: string | null
+          product_description?: string | null
+          product_image?: string | null
+          product_name?: string
+          product_price?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_approval_requests_product_category_id_fkey"
+            columns: ["product_category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           category_id: string | null
@@ -170,6 +270,7 @@ export type Database = {
           description: string | null
           id: string
           image: string | null
+          merchant_id: string | null
           name: string
           price: number
           updated_at: string | null
@@ -180,6 +281,7 @@ export type Database = {
           description?: string | null
           id?: string
           image?: string | null
+          merchant_id?: string | null
           name: string
           price: number
           updated_at?: string | null
@@ -190,6 +292,7 @@ export type Database = {
           description?: string | null
           id?: string
           image?: string | null
+          merchant_id?: string | null
           name?: string
           price?: number
           updated_at?: string | null
@@ -277,6 +380,7 @@ export type Database = {
           admin_password: string
           created_at: string | null
           id: string
+          merchant_password: string | null
           store_name: string
           theme_id: number | null
           updated_at: string | null
@@ -286,6 +390,7 @@ export type Database = {
           admin_password?: string
           created_at?: string | null
           id?: string
+          merchant_password?: string | null
           store_name?: string
           theme_id?: number | null
           updated_at?: string | null
@@ -295,6 +400,7 @@ export type Database = {
           admin_password?: string
           created_at?: string | null
           id?: string
+          merchant_password?: string | null
           store_name?: string
           theme_id?: number | null
           updated_at?: string | null

@@ -1,208 +1,206 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useApp } from '@/contexts/AppContext';
-import { useSettingsContext } from '@/contexts/SettingsContext';
 import { Eye, EyeOff } from 'lucide-react';
 
 const AuthScreen = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [userType, setUserType] = useState<'user' | 'merchant'>('user');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     birthDate: '',
+    userType: 'user',
     whatsappNumber: '',
     storeName: ''
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  
+  const { signIn, signUp } = useAuth();
+  const { login } = useApp();
 
-  const { signUp, signIn } = useAuth();
-  const { setUser } = useApp(); // Changed from login to setUser
-  const { t } = useSettingsContext();
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const validateForm = (): string | null => {
+    if (!isLogin) {
+      if (!formData.name) return 'الاسم مطلوب';
+      if (!formData.birthDate) return 'تاريخ الميلاد مطلوب';
+    }
+    if (!formData.email) return 'البريد الإلكتروني مطلوب';
+    if (!formData.password) return 'كلمة المرور مطلوبة';
+    return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     setLoading(true);
 
     try {
       if (isLogin) {
         const { user } = await signIn(formData.email, formData.password);
         if (user) {
-          setUser(user); // Changed from login to setUser
+          login(user);
         }
       } else {
-        await signUp(
+        if (!formData.name || !formData.birthDate) {
+          throw new Error('يرجى ملء جميع الحقول المطلوبة');
+        }
+        
+        const additionalData = {
+          userType: formData.userType,
+          whatsappNumber: formData.whatsappNumber,
+          storeName: formData.storeName
+        };
+        
+        const { user } = await signUp(
           formData.name,
           formData.email,
           formData.password,
           formData.birthDate,
-          {
-            userType,
-            whatsappNumber: formData.whatsappNumber,
-            storeName: formData.storeName
-          }
+          additionalData
         );
-        alert(t('registrationSuccess'));
-        setIsLogin(true);
+        
+        if (user) {
+          login(user);
+        }
       }
     } catch (error: any) {
-      alert(error.message || t('authError'));
+      setError(error.message || 'حدث خطأ غير متوقع');
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="max-w-md w-full space-y-8">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">{isLogin ? t('login') : t('register')}</CardTitle>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-center text-2xl font-bold">
+            {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                {error}
+              </div>
+            )}
+            
             {!isLogin && (
               <>
                 <div>
-                  <Label htmlFor="name">{t('name')}</Label>
+                  <label className="block text-sm font-medium mb-1">الاسم الكامل *</label>
                   <Input
-                    type="text"
-                    id="name"
-                    name="name"
                     value={formData.name}
-                    onChange={handleInputChange}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     required
                   />
                 </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">تاريخ الميلاد *</label>
+                  <Input
+                    type="date"
+                    value={formData.birthDate}
+                    onChange={(e) => setFormData(prev => ({ ...prev, birthDate: e.target.value }))}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">نوع الحساب</label>
+                  <select
+                    value={formData.userType}
+                    onChange={(e) => setFormData(prev => ({ ...prev, userType: e.target.value }))}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="user">عميل</option>
+                    <option value="merchant">تاجر</option>
+                  </select>
+                </div>
+                
+                {formData.userType === 'merchant' && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">رقم الواتساب</label>
+                      <Input
+                        type="tel"
+                        value={formData.whatsappNumber}
+                        onChange={(e) => setFormData(prev => ({ ...prev, whatsappNumber: e.target.value }))}
+                        placeholder="مثال: 201234567890"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-1">اسم المتجر</label>
+                      <Input
+                        value={formData.storeName}
+                        onChange={(e) => setFormData(prev => ({ ...prev, storeName: e.target.value }))}
+                        placeholder="اسم متجرك"
+                      />
+                    </div>
+                  </>
+                )}
               </>
             )}
+            
             <div>
-              <Label htmlFor="email">{t('email')}</Label>
+              <label className="block text-sm font-medium mb-1">البريد الإلكتروني *</label>
               <Input
                 type="email"
-                id="email"
-                name="email"
                 value={formData.email}
-                onChange={handleInputChange}
+                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                 required
               />
             </div>
+            
             <div>
-              <Label htmlFor="password">{t('password')}</Label>
+              <label className="block text-sm font-medium mb-1">كلمة المرور *</label>
               <div className="relative">
                 <Input
                   type={showPassword ? 'text' : 'password'}
-                  id="password"
-                  name="password"
                   value={formData.password}
-                  onChange={handleInputChange}
+                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                   required
                 />
-                <Button
+                <button
                   type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-2 top-1/2 -translate-y-1/2"
-                  onClick={togglePasswordVisibility}
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
             </div>
-            {!isLogin && (
-              <>
-                <div>
-                  <Label htmlFor="birthDate">{t('birthDate')}</Label>
-                  <Input
-                    type="date"
-                    id="birthDate"
-                    name="birthDate"
-                    value={formData.birthDate}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="whatsappNumber">{t('whatsappNumber')}</Label>
-                  <Input
-                    type="tel"
-                    id="whatsappNumber"
-                    name="whatsappNumber"
-                    value={formData.whatsappNumber}
-                    onChange={handleInputChange}
-                    placeholder="201234567890"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="storeName">{t('storeName')}</Label>
-                  <Input
-                    type="text"
-                    id="storeName"
-                    name="storeName"
-                    value={formData.storeName}
-                    onChange={handleInputChange}
-                    placeholder={t('storeNamePlaceholder')}
-                  />
-                </div>
-                <div>
-                  <Label>{t('userType')}</Label>
-                  <div className="flex space-x-4">
-                    <Button
-                      type="button"
-                      variant={userType === 'user' ? 'default' : 'outline'}
-                      onClick={() => setUserType('user')}
-                    >
-                      {t('user')}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={userType === 'merchant' ? 'default' : 'outline'}
-                      onClick={() => setUserType('merchant')}
-                    >
-                      {t('merchant')}
-                    </Button>
-                  </div>
-                </div>
-              </>
-            )}
-            <div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? t('loading') : (isLogin ? t('login') : t('register'))}
-              </Button>
+            
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'جاري التحميل...' : (isLogin ? 'تسجيل الدخول' : 'إنشاء الحساب')}
+            </Button>
+            
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setIsLogin(!isLogin)}
+                className="text-blue-600 hover:underline"
+              >
+                {isLogin ? 'ليس لديك حساب؟ سجل الآن' : 'لديك حساب بالفعل؟ سجل دخولك'}
+              </button>
             </div>
           </form>
-          <div className="text-sm text-gray-600 text-center">
-            {isLogin ? (
-              <>
-                {t('noAccount')}
-                <Button variant="link" onClick={() => setIsLogin(false)}>
-                  {t('register')}
-                </Button>
-              </>
-            ) : (
-              <>
-                {t('alreadyHaveAccount')}
-                <Button variant="link" onClick={() => setIsLogin(true)}>
-                  {t('login')}
-                </Button>
-              </>
-            )}
-          </div>
         </CardContent>
       </Card>
     </div>
