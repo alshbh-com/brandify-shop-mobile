@@ -54,7 +54,8 @@ export const useAuth = () => {
           birth_date: birthDate,
           user_type: additionalData?.userType || 'user',
           whatsapp_number: additionalData?.whatsappNumber || '',
-          store_name: additionalData?.storeName || ''
+          store_name: additionalData?.storeName || '',
+          store_logo: additionalData?.storeLogo || ''
         }
       }
     });
@@ -78,6 +79,34 @@ export const useAuth = () => {
           user_id: data.user.id,
           role: 'merchant'
         });
+
+        // إنشاء القسم الفرعي (المتجر) للتاجر إذا كان اسم المتجر موجود
+        if (additionalData?.storeName) {
+          try {
+            // تحديد قسم افتراضي (يمكن تعديله لاحقاً)
+            const { data: categories } = await supabase
+              .from('categories')
+              .select('id')
+              .limit(1);
+            
+            if (categories && categories.length > 0) {
+              await supabase.from('subcategories').insert({
+                name: additionalData.storeName,
+                description: `متجر ${additionalData.storeName}`,
+                logo: additionalData?.storeLogo || '/placeholder.svg',
+                banner_image: additionalData?.storeLogo || '/placeholder.svg',
+                category_id: categories[0].id,
+                merchant_id: data.user.id,
+                is_active: true
+              });
+              
+              console.log('تم إنشاء المتجر الفرعي بنجاح:', additionalData.storeName);
+            }
+          } catch (subcategoryError) {
+            console.error('خطأ في إنشاء المتجر الفرعي:', subcategoryError);
+            // لا نقطع العملية إذا فشل إنشاء المتجر الفرعي
+          }
+        }
       } else {
         await supabase.from('user_roles').insert({
           user_id: data.user.id,

@@ -18,17 +18,25 @@ export const useSubcategories = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // For now, return empty array until subcategories table is created
-    setLoading(false);
+    fetchSubcategories();
   }, []);
 
   const fetchSubcategories = async () => {
     try {
-      // This will work once the subcategories table is created
-      console.log('Subcategories table not yet created');
-      setSubcategories([]);
+      const { data, error } = await supabase
+        .from('subcategories')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching subcategories:', error);
+        setSubcategories([]);
+      } else {
+        setSubcategories(data || []);
+      }
     } catch (error) {
       console.error('Error fetching subcategories:', error);
+      setSubcategories([]);
     } finally {
       setLoading(false);
     }
@@ -40,8 +48,16 @@ export const useSubcategories = () => {
 
   const addSubcategory = async (subcategory: Omit<Subcategory, 'id'>) => {
     try {
-      console.log('Adding subcategory:', subcategory);
-      return { id: 'temp-id', ...subcategory };
+      const { data, error } = await supabase
+        .from('subcategories')
+        .insert([subcategory])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setSubcategories(prev => [data, ...prev]);
+      return data;
     } catch (error) {
       console.error('Error adding subcategory:', error);
       throw error;
@@ -50,8 +66,17 @@ export const useSubcategories = () => {
 
   const updateSubcategory = async (id: string, updates: Partial<Subcategory>) => {
     try {
-      console.log('Updating subcategory:', id, updates);
-      return { id, ...updates };
+      const { data, error } = await supabase
+        .from('subcategories')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setSubcategories(prev => prev.map(sub => sub.id === id ? data : sub));
+      return data;
     } catch (error) {
       console.error('Error updating subcategory:', error);
       throw error;
@@ -60,7 +85,14 @@ export const useSubcategories = () => {
 
   const deleteSubcategory = async (id: string) => {
     try {
-      console.log('Deleting subcategory:', id);
+      const { error } = await supabase
+        .from('subcategories')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setSubcategories(prev => prev.filter(sub => sub.id !== id));
     } catch (error) {
       console.error('Error deleting subcategory:', error);
       throw error;

@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useApp } from '@/contexts/AppContext';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Upload, Store } from 'lucide-react';
 
 const AuthScreen = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,7 +17,8 @@ const AuthScreen = () => {
     birthDate: '',
     userType: 'user',
     whatsappNumber: '',
-    storeName: ''
+    storeName: '',
+    storeLogo: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -29,6 +31,17 @@ const AuthScreen = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFormData(prev => ({ ...prev, storeLogo: e.target?.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -37,6 +50,7 @@ const AuthScreen = () => {
     if (!isLogin) {
       if (!formData.name) return 'الاسم مطلوب';
       if (!formData.birthDate) return 'تاريخ الميلاد مطلوب';
+      if (formData.userType === 'merchant' && !formData.storeName) return 'اسم المتجر مطلوب';
     }
     if (!formData.email) return 'البريد الإلكتروني مطلوب';
     if (!formData.password) return 'كلمة المرور مطلوبة';
@@ -62,7 +76,8 @@ const AuthScreen = () => {
         const additionalData = {
           userType: formData.userType,
           whatsappNumber: formData.whatsappNumber,
-          storeName: formData.storeName
+          storeName: formData.storeName,
+          storeLogo: formData.storeLogo
         };
         
         const { user } = await signUp(
@@ -86,7 +101,7 @@ const AuthScreen = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
         <CardHeader>
           <CardTitle className="text-center text-2xl font-bold">
             {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}
@@ -146,12 +161,39 @@ const AuthScreen = () => {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium mb-1">اسم المتجر</label>
+                      <label className="block text-sm font-medium mb-1">اسم المتجر *</label>
                       <Input
                         value={formData.storeName}
                         onChange={(e) => setFormData(prev => ({ ...prev, storeName: e.target.value }))}
                         placeholder="اسم متجرك"
+                        required
                       />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">شعار/لوجو المتجر</label>
+                      {formData.storeLogo && (
+                        <div className="mb-3">
+                          <img
+                            src={formData.storeLogo}
+                            alt="Store Logo Preview"
+                            className="w-20 h-20 object-cover rounded-lg border mx-auto"
+                          />
+                        </div>
+                      )}
+                      <label className="flex items-center justify-center gap-2 bg-green-50 border-2 border-dashed border-green-300 py-4 px-4 rounded-lg cursor-pointer hover:bg-green-100 transition-colors">
+                        <Store size={20} className="text-green-500" />
+                        <span className="text-green-600 font-medium">رفع شعار المتجر</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                      </label>
+                      <p className="text-xs text-gray-500 mt-1 text-center">
+                        يمكنك رفع الصورة من الهاتف أو الكمبيوتر
+                      </p>
                     </div>
                   </>
                 )}
