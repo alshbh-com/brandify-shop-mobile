@@ -1,18 +1,21 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useApp } from '@/contexts/AppContext';
+import { useSubcategories } from '@/hooks/useSubcategories';
 import { ShoppingBag, AlertCircle } from 'lucide-react';
 import StoreHeader from './StoreHeader';
 import OffersSection from './OffersSection';
 import CategoryFilter from './CategoryFilter';
 import ProductGrid from './ProductGrid';
+import SubcategoryGrid from './SubcategoryGrid';
+import SubcategoryProductsScreen from './SubcategoryProductsScreen';
 
 const HomeScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [adminPassword, setAdminPassword] = useState('');
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   
@@ -25,6 +28,8 @@ const HomeScreen = () => {
     cart,
     clearCart
   } = useApp();
+
+  const { subcategories, getSubcategoriesByCategory } = useSubcategories();
 
   // استخدام المنتجات المفلترة بدلاً من جميع المنتجات
   const availableProducts = getFilteredProducts();
@@ -48,6 +53,40 @@ const HomeScreen = () => {
       alert('كلمة مرور خاطئة');
     }
   };
+
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    setSelectedSubcategory(null);
+  };
+
+  const handleSubcategorySelect = (subcategoryId: string) => {
+    setSelectedSubcategory(subcategoryId);
+  };
+
+  const handleBackFromSubcategory = () => {
+    setSelectedSubcategory(null);
+  };
+
+  // إذا تم اختيار قسم فرعي، اعرض منتجاته
+  if (selectedSubcategory) {
+    const subcategory = subcategories.find(s => s.id === selectedSubcategory);
+    if (subcategory) {
+      return (
+        <SubcategoryProductsScreen
+          subcategoryId={selectedSubcategory}
+          subcategoryName={subcategory.name}
+          subcategoryLogo={subcategory.logo}
+          subcategoryBanner={subcategory.banner_image}
+          onBack={handleBackFromSubcategory}
+        />
+      );
+    }
+  }
+
+  // الحصول على الأقسام الفرعية للقسم المختار
+  const currentSubcategories = selectedCategory !== 'all' 
+    ? getSubcategoriesByCategory(selectedCategory)
+    : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50 pb-20">
@@ -96,39 +135,63 @@ const HomeScreen = () => {
       <CategoryFilter
         categories={categories}
         selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
+        onCategoryChange={handleCategoryChange}
         productsCount={filteredProducts.length}
       />
 
-      {/* شبكة المنتجات */}
-      <div className="px-6 pb-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              {currentMerchantId ? 'منتجات التاجر المختار' : 'جميع المنتجات'}
-            </h2>
-          </div>
-          <div className="text-sm text-gray-500">
-            {filteredProducts.length} من أصل {availableProducts.length} منتج
-          </div>
-        </div>
-        
-        {filteredProducts.length > 0 ? (
-          <ProductGrid
-            products={filteredProducts}
-            getCategoryName={getCategoryName}
-          />
-        ) : (
-          <div className="text-center py-16">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ShoppingBag className="w-12 h-12 text-gray-400" />
+      {/* عرض الأقسام الفرعية إذا كان هناك قسم مختار */}
+      {selectedCategory !== 'all' && currentSubcategories.length > 0 && (
+        <div className="px-6 pb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-1 h-8 bg-gradient-to-b from-green-500 to-blue-500 rounded-full"></div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                {getCategoryName(selectedCategory)}
+              </h2>
             </div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">لا توجد منتجات</h3>
-            <p className="text-gray-500">جرب البحث بكلمات مختلفة أو اختر قسم آخر</p>
+            <div className="text-sm text-gray-500">
+              {currentSubcategories.length} متجر
+            </div>
           </div>
-        )}
-      </div>
+          
+          <SubcategoryGrid
+            subcategories={currentSubcategories}
+            onSubcategorySelect={handleSubcategorySelect}
+          />
+        </div>
+      )}
+
+      {/* شبكة المنتجات - تظهر فقط إذا لم يكن هناك أقسام فرعية أو لم يتم اختيار قسم */}
+      {(selectedCategory === 'all' || currentSubcategories.length === 0) && (
+        <div className="px-6 pb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                {currentMerchantId ? 'منتجات التاجر المختار' : 'جميع المنتجات'}
+              </h2>
+            </div>
+            <div className="text-sm text-gray-500">
+              {filteredProducts.length} من أصل {availableProducts.length} منتج
+            </div>
+          </div>
+          
+          {filteredProducts.length > 0 ? (
+            <ProductGrid
+              products={filteredProducts}
+              getCategoryName={getCategoryName}
+            />
+          ) : (
+            <div className="text-center py-16">
+              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ShoppingBag className="w-12 h-12 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">لا توجد منتجات</h3>
+              <p className="text-gray-500">جرب البحث بكلمات مختلفة أو اختر قسم آخر</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* نافذة دخول الإدارة */}
       {showAdminLogin && (
