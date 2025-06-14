@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -105,7 +104,7 @@ const ProductGrid = ({ products, getCategoryName }: ProductGridProps) => {
                 <div className="flex items-center justify-between pt-2">
                   <div className="flex flex-col">
                     <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                      {product.price} ر.س
+                      {product.price} ج.م
                     </span>
                     <span className="text-xs text-gray-400">شامل الضريبة</span>
                   </div>
