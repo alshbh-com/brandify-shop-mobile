@@ -10,6 +10,8 @@ import { supabase } from '@/integrations/supabase/client';
 const AuthScreen = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -26,7 +28,33 @@ const AuthScreen = () => {
   const [rateLimitError, setRateLimitError] = useState(false);
   
   const { signIn, signUp } = useAuth();
-  const { login, categories } = useApp();
+  const { login } = useApp();
+
+  // تحميل الأقسام الرئيسية عند تحميل المكون
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setCategoriesLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .order('name');
+        
+        if (error) {
+          console.error('Error fetching categories:', error);
+        } else {
+          setCategories(data || []);
+          console.log('Categories loaded:', data);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -176,8 +204,11 @@ const AuthScreen = () => {
                         onChange={handleInputChange}
                         className="w-full p-2 border border-gray-300 rounded-md"
                         required
+                        disabled={categoriesLoading}
                       >
-                        <option value="">اختر القسم الرئيسي لمتجرك</option>
+                        <option value="">
+                          {categoriesLoading ? 'جاري تحميل الأقسام...' : 'اختر القسم الرئيسي لمتجرك'}
+                        </option>
                         {categories.map(category => (
                           <option key={category.id} value={category.id}>
                             {category.name}
