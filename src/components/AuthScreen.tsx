@@ -13,12 +13,13 @@ const AuthScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const [categoriesError, setCategoriesError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     birthDate: '',
-    userType: 'user',
+    userType: 'customer', // Changed default to customer
     whatsappNumber: '',
     storeName: '',
     storeLogo: '',
@@ -34,32 +35,43 @@ const AuthScreen = () => {
   // تحميل الأقسام الرئيسية عند تحميل المكون
   useEffect(() => {
     const fetchCategories = async () => {
+      console.log('Starting to fetch categories...');
       setCategoriesLoading(true);
+      setCategoriesError('');
+      
       try {
-        console.log('Fetching categories...');
         const { data, error } = await supabase
           .from('categories')
           .select('*')
           .order('name');
         
+        console.log('Supabase response:', { data, error });
+        
         if (error) {
           console.error('Error fetching categories:', error);
+          setCategoriesError('خطأ في تحميل الأقسام');
         } else {
           console.log('Categories fetched successfully:', data);
           setCategories(data || []);
+          
+          if (!data || data.length === 0) {
+            console.warn('No categories found in database');
+            setCategoriesError('لا توجد أقسام في قاعدة البيانات');
+          }
         }
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error('Unexpected error fetching categories:', error);
+        setCategoriesError('خطأ غير متوقع في تحميل الأقسام');
       } finally {
         setCategoriesLoading(false);
       }
     };
 
-    // تحميل الأقسام فقط عند التسجيل الجديد
-    if (!isLogin) {
+    // تحميل الأقسام فقط عند التسجيل الجديد وكان نوع المستخدم تاجر
+    if (!isLogin && formData.userType === 'merchant') {
       fetchCategories();
     }
-  }, [isLogin]);
+  }, [isLogin, formData.userType]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -191,9 +203,9 @@ const AuthScreen = () => {
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, userType: 'user' }))}
+                      onClick={() => setFormData(prev => ({ ...prev, userType: 'customer' }))}
                       className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all ${
-                        formData.userType === 'user'
+                        formData.userType === 'customer'
                           ? 'border-blue-500 bg-blue-50 text-blue-700'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
@@ -247,9 +259,14 @@ const AuthScreen = () => {
                       <p className="text-xs text-gray-500 mt-1">
                         سيتم إنشاء متجرك كقسم فرعي داخل القسم الرئيسي المختار
                       </p>
-                      {categories.length === 0 && !categoriesLoading && (
+                      {categoriesError && (
                         <p className="text-xs text-red-500 mt-1">
-                          لا توجد أقسام متاحة حالياً
+                          {categoriesError}
+                        </p>
+                      )}
+                      {!categoriesLoading && categories.length === 0 && !categoriesError && (
+                        <p className="text-xs text-orange-500 mt-1">
+                          جاري التحقق من الأقسام المتاحة...
                         </p>
                       )}
                     </div>
