@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useApp } from '@/contexts/AppContext';
-import { Eye, EyeOff, Upload, Store, AlertCircle, User, ShoppingBag } from 'lucide-react';
+import { Eye, EyeOff, Upload, Store, AlertCircle, User, ShoppingBag, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const AuthScreen = () => {
@@ -31,39 +31,38 @@ const AuthScreen = () => {
   const { signIn, signUp } = useAuth();
   const { login } = useApp();
 
-  // تحميل الأقسام فقط عند اختيار نوع التاجر
+  // تحميل الأقسام عند تحميل المكون للتأكد من وجودها
   useEffect(() => {
     const fetchCategories = async () => {
-      if (formData.userType !== 'merchant') return;
-      
       setCategoriesLoading(true);
       
       try {
+        console.log('جاري تحميل الأقسام من قاعدة البيانات...');
         const { data, error } = await supabase
           .from('categories')
-          .select('*')
+          .select('id, name, image, created_at')
           .order('name');
         
+        console.log('استجابة قاعدة البيانات:', { data, error, count: data?.length });
+        
         if (error) {
-          console.error('Error fetching categories:', error);
+          console.error('خطأ في تحميل الأقسام:', error);
           setCategories([]);
         } else {
-          console.log('Categories loaded:', data);
+          console.log(`تم تحميل ${data?.length || 0} قسم بنجاح`);
           setCategories(data || []);
         }
       } catch (error) {
-        console.error('Unexpected error:', error);
+        console.error('خطأ غير متوقع:', error);
         setCategories([]);
       } finally {
         setCategoriesLoading(false);
       }
     };
 
-    // تحميل الأقسام فقط عند التسجيل الجديد ونوع المستخدم تاجر
-    if (!isLogin && formData.userType === 'merchant') {
-      fetchCategories();
-    }
-  }, [isLogin, formData.userType]);
+    // تحميل الأقسام دائماً لعرض المعلومات الصحيحة
+    fetchCategories();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -94,14 +93,19 @@ const AuthScreen = () => {
           login(user);
         }
       } else {
-        // التحقق من الحقول الأساسية
+        // التحقق من الحقول الأساسية للجميع
         if (!formData.name || !formData.birthDate) {
-          throw new Error('يرجى ملء جميع الحقول المطلوبة');
+          throw new Error('يرجى ملء الاسم وتاريخ الميلاد');
         }
         
         // التحقق من حقول التاجر فقط إذا كان المستخدم تاجر
-        if (formData.userType === 'merchant' && (!formData.storeName || !formData.storeCategory)) {
-          throw new Error('يرجى ملء اسم المتجر واختيار نوع المتجر');
+        if (formData.userType === 'merchant') {
+          if (!formData.storeName || !formData.storeCategory) {
+            throw new Error('يرجى ملء اسم المتجر واختيار القسم الرئيسي');
+          }
+          if (categories.length === 0) {
+            throw new Error('لا توجد أقسام متاحة حالياً. يرجى المحاولة لاحقاً أو التواصل مع الإدارة');
+          }
         }
         
         const additionalData = {
@@ -125,7 +129,7 @@ const AuthScreen = () => {
         }
       }
     } catch (error: any) {
-      console.error('Auth error:', error);
+      console.error('خطأ في المصادقة:', error);
       
       if (error.message?.includes('over_email_send_rate_limit') || error.message?.includes('rate limit')) {
         setRateLimitError(true);
@@ -177,6 +181,7 @@ const AuthScreen = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
+                    placeholder="أدخل اسمك الكامل"
                     required
                   />
                 </div>
@@ -194,36 +199,52 @@ const AuthScreen = () => {
                 
                 <div>
                   <label className="block text-sm font-medium mb-2">نوع الحساب</label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, userType: 'guest' }))}
+                      className={`flex flex-col items-center justify-center p-3 border-2 rounded-lg transition-all text-xs ${
+                        formData.userType === 'guest'
+                          ? 'border-green-500 bg-green-50 text-green-700'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <Users className="w-6 h-6 mb-1" />
+                      <span className="font-medium">ضيف</span>
+                      <span className="text-xs text-gray-500 text-center mt-1">
+                        تسجيل سريع
+                      </span>
+                    </button>
+                    
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, userType: 'customer' }))}
-                      className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all ${
+                      className={`flex flex-col items-center justify-center p-3 border-2 rounded-lg transition-all text-xs ${
                         formData.userType === 'customer'
                           ? 'border-blue-500 bg-blue-50 text-blue-700'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
-                      <User className="w-8 h-8 mb-2" />
+                      <User className="w-6 h-6 mb-1" />
                       <span className="font-medium">عميل</span>
                       <span className="text-xs text-gray-500 text-center mt-1">
-                        للتسوق والشراء
+                        للتسوق
                       </span>
                     </button>
                     
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, userType: 'merchant' }))}
-                      className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all ${
+                      className={`flex flex-col items-center justify-center p-3 border-2 rounded-lg transition-all text-xs ${
                         formData.userType === 'merchant'
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          ? 'border-purple-500 bg-purple-50 text-purple-700'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
-                      <ShoppingBag className="w-8 h-8 mb-2" />
+                      <ShoppingBag className="w-6 h-6 mb-1" />
                       <span className="font-medium">تاجر</span>
                       <span className="text-xs text-gray-500 text-center mt-1">
-                        لبيع المنتجات
+                        للبيع
                       </span>
                     </button>
                   </div>
@@ -232,17 +253,21 @@ const AuthScreen = () => {
                 {formData.userType === 'merchant' && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium mb-1">نوع المتجر (القسم الرئيسي) *</label>
+                      <label className="block text-sm font-medium mb-1">القسم الرئيسي للمتجر *</label>
                       <select
                         name="storeCategory"
                         value={formData.storeCategory}
                         onChange={handleInputChange}
                         className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
-                        disabled={categoriesLoading}
+                        disabled={categoriesLoading || categories.length === 0}
                       >
                         <option value="">
-                          {categoriesLoading ? 'جاري تحميل الأقسام...' : 'اختر القسم الرئيسي لمتجرك'}
+                          {categoriesLoading 
+                            ? 'جاري تحميل الأقسام...' 
+                            : categories.length === 0 
+                              ? 'لا توجد أقسام متاحة'
+                              : 'اختر القسم الرئيسي لمتجرك'}
                         </option>
                         {categories.map(category => (
                           <option key={category.id} value={category.id}>
@@ -254,10 +279,26 @@ const AuthScreen = () => {
                         سيتم إنشاء متجرك كقسم فرعي داخل القسم الرئيسي المختار
                       </p>
                       {!categoriesLoading && categories.length === 0 && (
-                        <p className="text-xs text-orange-500 mt-1">
-                          تأكد من إضافة الأقسام من لوحة الإدارة أولاً
+                        <p className="text-xs text-red-500 mt-1 bg-red-50 p-2 rounded">
+                          ⚠️ لا توجد أقسام في قاعدة البيانات. يرجى التواصل مع إدارة المتجر لإضافة الأقسام أولاً.
                         </p>
                       )}
+                      {categories.length > 0 && (
+                        <p className="text-xs text-green-600 mt-1">
+                          ✅ تم العثور على {categories.length} قسم متاح
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">اسم المتجر *</label>
+                      <Input
+                        name="storeName"
+                        value={formData.storeName}
+                        onChange={handleInputChange}
+                        placeholder="اسم متجرك التجاري"
+                        required
+                      />
                     </div>
 
                     <div>
@@ -268,17 +309,6 @@ const AuthScreen = () => {
                         value={formData.whatsappNumber}
                         onChange={handleInputChange}
                         placeholder="مثال: 201234567890"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium mb-1">اسم المتجر *</label>
-                      <Input
-                        name="storeName"
-                        value={formData.storeName}
-                        onChange={handleInputChange}
-                        placeholder="اسم متجرك"
-                        required
                       />
                     </div>
                     
@@ -319,6 +349,7 @@ const AuthScreen = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
+                placeholder="example@email.com"
                 required
               />
             </div>
@@ -331,6 +362,7 @@ const AuthScreen = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
+                  placeholder="أدخل كلمة مرور قوية"
                   required
                 />
                 <button
@@ -341,15 +373,26 @@ const AuthScreen = () => {
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+              {!isLogin && (
+                <p className="text-xs text-gray-500 mt-1">
+                  يجب أن تكون كلمة المرور 6 أحرف على الأقل
+                </p>
+              )}
             </div>
             
             <Button 
               type="submit" 
               className="w-full" 
-              disabled={loading}
+              disabled={loading || (!isLogin && formData.userType === 'merchant' && categories.length === 0)}
             >
               {loading ? 'جاري التحميل...' : (isLogin ? 'تسجيل الدخول' : 'إنشاء الحساب')}
             </Button>
+            
+            {!isLogin && formData.userType === 'merchant' && categories.length === 0 && (
+              <p className="text-xs text-orange-600 text-center">
+                لا يمكن إنشاء حساب تاجر بدون وجود أقسام في النظام
+              </p>
+            )}
             
             <div className="text-center">
               <button
