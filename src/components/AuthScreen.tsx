@@ -13,13 +13,12 @@ const AuthScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
-  const [categoriesError, setCategoriesError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     birthDate: '',
-    userType: 'customer', // Changed default to customer
+    userType: 'customer', // العميل هو الافتراضي
     whatsappNumber: '',
     storeName: '',
     storeLogo: '',
@@ -32,12 +31,12 @@ const AuthScreen = () => {
   const { signIn, signUp } = useAuth();
   const { login } = useApp();
 
-  // تحميل الأقسام الرئيسية عند تحميل المكون
+  // تحميل الأقسام فقط عند اختيار نوع التاجر
   useEffect(() => {
     const fetchCategories = async () => {
-      console.log('Starting to fetch categories...');
+      if (formData.userType !== 'merchant') return;
+      
       setCategoriesLoading(true);
-      setCategoriesError('');
       
       try {
         const { data, error } = await supabase
@@ -45,29 +44,22 @@ const AuthScreen = () => {
           .select('*')
           .order('name');
         
-        console.log('Supabase response:', { data, error });
-        
         if (error) {
           console.error('Error fetching categories:', error);
-          setCategoriesError('خطأ في تحميل الأقسام');
+          setCategories([]);
         } else {
-          console.log('Categories fetched successfully:', data);
+          console.log('Categories loaded:', data);
           setCategories(data || []);
-          
-          if (!data || data.length === 0) {
-            console.warn('No categories found in database');
-            setCategoriesError('لا توجد أقسام في قاعدة البيانات');
-          }
         }
       } catch (error) {
-        console.error('Unexpected error fetching categories:', error);
-        setCategoriesError('خطأ غير متوقع في تحميل الأقسام');
+        console.error('Unexpected error:', error);
+        setCategories([]);
       } finally {
         setCategoriesLoading(false);
       }
     };
 
-    // تحميل الأقسام فقط عند التسجيل الجديد وكان نوع المستخدم تاجر
+    // تحميل الأقسام فقط عند التسجيل الجديد ونوع المستخدم تاجر
     if (!isLogin && formData.userType === 'merchant') {
       fetchCategories();
     }
@@ -102,10 +94,12 @@ const AuthScreen = () => {
           login(user);
         }
       } else {
+        // التحقق من الحقول الأساسية
         if (!formData.name || !formData.birthDate) {
           throw new Error('يرجى ملء جميع الحقول المطلوبة');
         }
         
+        // التحقق من حقول التاجر فقط إذا كان المستخدم تاجر
         if (formData.userType === 'merchant' && (!formData.storeName || !formData.storeCategory)) {
           throw new Error('يرجى ملء اسم المتجر واختيار نوع المتجر');
         }
@@ -259,14 +253,9 @@ const AuthScreen = () => {
                       <p className="text-xs text-gray-500 mt-1">
                         سيتم إنشاء متجرك كقسم فرعي داخل القسم الرئيسي المختار
                       </p>
-                      {categoriesError && (
-                        <p className="text-xs text-red-500 mt-1">
-                          {categoriesError}
-                        </p>
-                      )}
-                      {!categoriesLoading && categories.length === 0 && !categoriesError && (
+                      {!categoriesLoading && categories.length === 0 && (
                         <p className="text-xs text-orange-500 mt-1">
-                          جاري التحقق من الأقسام المتاحة...
+                          تأكد من إضافة الأقسام من لوحة الإدارة أولاً
                         </p>
                       )}
                     </div>
