@@ -10,7 +10,6 @@ import { supabase } from '@/integrations/supabase/client';
 const AuthScreen = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [categories, setCategories] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -27,30 +26,7 @@ const AuthScreen = () => {
   const [rateLimitError, setRateLimitError] = useState(false);
   
   const { signIn, signUp } = useAuth();
-  const { login } = useApp();
-
-  // تحميل الأقسام الرئيسية عند تحميل المكون
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('categories')
-          .select('*')
-          .order('name');
-        
-        if (error) {
-          console.error('Error fetching categories:', error);
-        } else {
-          setCategories(data || []);
-          console.log('Categories loaded:', data);
-        }
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      }
-    };
-
-    fetchCategories();
-  }, []);
+  const { login, categories } = useApp();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -202,15 +178,11 @@ const AuthScreen = () => {
                         required
                       >
                         <option value="">اختر القسم الرئيسي لمتجرك</option>
-                        {categories.length > 0 ? (
-                          categories.map(category => (
-                            <option key={category.id} value={category.id}>
-                              {category.name}
-                            </option>
-                          ))
-                        ) : (
-                          <option value="" disabled>جاري تحميل الأقسام...</option>
-                        )}
+                        {categories.map(category => (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        ))}
                       </select>
                       <p className="text-xs text-gray-500 mt-1">
                         سيتم إنشاء متجرك كقسم فرعي داخل القسم الرئيسي المختار
