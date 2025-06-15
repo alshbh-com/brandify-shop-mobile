@@ -1,15 +1,16 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useApp } from '@/contexts/AppContext';
 import { Eye, EyeOff, Upload, Store, AlertCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const AuthScreen = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -26,7 +27,30 @@ const AuthScreen = () => {
   const [rateLimitError, setRateLimitError] = useState(false);
   
   const { signIn, signUp } = useAuth();
-  const { login, categories } = useApp();
+  const { login } = useApp();
+
+  // تحميل الأقسام الرئيسية عند تحميل المكون
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .order('name');
+        
+        if (error) {
+          console.error('Error fetching categories:', error);
+        } else {
+          setCategories(data || []);
+          console.log('Categories loaded:', data);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -169,7 +193,7 @@ const AuthScreen = () => {
                 {formData.userType === 'merchant' && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium mb-1">نوع المتجر *</label>
+                      <label className="block text-sm font-medium mb-1">نوع المتجر (القسم الرئيسي) *</label>
                       <select
                         name="storeCategory"
                         value={formData.storeCategory}
@@ -177,13 +201,20 @@ const AuthScreen = () => {
                         className="w-full p-2 border border-gray-300 rounded-md"
                         required
                       >
-                        <option value="">اختر نوع المتجر</option>
-                        {categories.map(category => (
-                          <option key={category.id} value={category.id}>
-                            {category.name}
-                          </option>
-                        ))}
+                        <option value="">اختر القسم الرئيسي لمتجرك</option>
+                        {categories.length > 0 ? (
+                          categories.map(category => (
+                            <option key={category.id} value={category.id}>
+                              {category.name}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="" disabled>جاري تحميل الأقسام...</option>
+                        )}
                       </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        سيتم إنشاء متجرك كقسم فرعي داخل القسم الرئيسي المختار
+                      </p>
                     </div>
 
                     <div>
