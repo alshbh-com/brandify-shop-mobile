@@ -31,38 +31,61 @@ const AuthScreen = () => {
   const { signIn, signUp } = useAuth();
   const { login } = useApp();
 
-  // تحميل الأقسام عند تحميل المكون للتأكد من وجودها
+  // تحميل الأقسام مع معالجة محسنة للأخطاء
   useEffect(() => {
     const fetchCategories = async () => {
       setCategoriesLoading(true);
+      console.log('🔄 بدء تحميل الأقسام...');
       
       try {
-        console.log('جاري تحميل الأقسام من قاعدة البيانات...');
-        const { data, error } = await supabase
+        // استعلام مبسط بدون ترتيب معقد
+        const { data, error, count } = await supabase
           .from('categories')
-          .select('id, name, image, created_at')
-          .order('name');
+          .select('*', { count: 'exact' });
         
-        console.log('استجابة قاعدة البيانات:', { data, error, count: data?.length });
+        console.log('📊 استجابة قاعدة البيانات:', {
+          data: data,
+          error: error,
+          count: count,
+          dataLength: data?.length
+        });
         
         if (error) {
-          console.error('خطأ في تحميل الأقسام:', error);
+          console.error('❌ خطأ في تحميل الأقسام:', error);
+          console.error('تفاصيل الخطأ:', {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          });
           setCategories([]);
         } else {
-          console.log(`تم تحميل ${data?.length || 0} قسم بنجاح`);
+          console.log('✅ تم تحميل الأقسام بنجاح');
+          console.log('📝 قائمة الأقسام:', data);
           setCategories(data || []);
         }
       } catch (error) {
-        console.error('خطأ غير متوقع:', error);
+        console.error('💥 خطأ غير متوقع في تحميل الأقسام:', error);
         setCategories([]);
       } finally {
         setCategoriesLoading(false);
+        console.log('🏁 انتهاء عملية تحميل الأقسام');
       }
     };
 
-    // تحميل الأقسام دائماً لعرض المعلومات الصحيحة
+    // تحميل الأقسام دائماً
     fetchCategories();
   }, []);
+
+  // إضافة معلومات تشخيصية إضافية
+  useEffect(() => {
+    console.log('📈 حالة الأقسام الحالية:', {
+      categories: categories,
+      length: categories.length,
+      loading: categoriesLoading,
+      userType: formData.userType
+    });
+  }, [categories, categoriesLoading, formData.userType]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -93,13 +116,22 @@ const AuthScreen = () => {
           login(user);
         }
       } else {
-        // التحقق من الحقول الأساسية للجميع
-        if (!formData.name || !formData.birthDate) {
-          throw new Error('يرجى ملء الاسم وتاريخ الميلاد');
-        }
-        
-        // التحقق من حقول التاجر فقط إذا كان المستخدم تاجر
-        if (formData.userType === 'merchant') {
+        // التحقق من الحقول الأساسية حسب نوع المستخدم
+        if (formData.userType === 'guest') {
+          // الضيف يحتاج فقط اسم وتاريخ ميلاد
+          if (!formData.name || !formData.birthDate) {
+            throw new Error('يرجى ملء الاسم وتاريخ الميلاد');
+          }
+        } else if (formData.userType === 'customer') {
+          // العميل يحتاج اسم وتاريخ ميلاد
+          if (!formData.name || !formData.birthDate) {
+            throw new Error('يرجى ملء الاسم وتاريخ الميلاد');
+          }
+        } else if (formData.userType === 'merchant') {
+          // التاجر يحتاج كل الحقول
+          if (!formData.name || !formData.birthDate) {
+            throw new Error('يرجى ملء الاسم وتاريخ الميلاد');
+          }
           if (!formData.storeName || !formData.storeCategory) {
             throw new Error('يرجى ملء اسم المتجر واختيار القسم الرئيسي');
           }
@@ -260,13 +292,13 @@ const AuthScreen = () => {
                         onChange={handleInputChange}
                         className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
-                        disabled={categoriesLoading || categories.length === 0}
+                        disabled={categoriesLoading}
                       >
                         <option value="">
                           {categoriesLoading 
                             ? 'جاري تحميل الأقسام...' 
                             : categories.length === 0 
-                              ? 'لا توجد أقسام متاحة'
+                              ? 'لا توجد أقسام متاحة - يرجى إعادة المحاولة'
                               : 'اختر القسم الرئيسي لمتجرك'}
                         </option>
                         {categories.map(category => (
@@ -275,19 +307,31 @@ const AuthScreen = () => {
                           </option>
                         ))}
                       </select>
-                      <p className="text-xs text-gray-500 mt-1">
-                        سيتم إنشاء متجرك كقسم فرعي داخل القسم الرئيسي المختار
-                      </p>
-                      {!categoriesLoading && categories.length === 0 && (
-                        <p className="text-xs text-red-500 mt-1 bg-red-50 p-2 rounded">
-                          ⚠️ لا توجد أقسام في قاعدة البيانات. يرجى التواصل مع إدارة المتجر لإضافة الأقسام أولاً.
+                      
+                      {/* حالة التحميل */}
+                      {categoriesLoading && (
+                        <p className="text-xs text-blue-600 mt-1 bg-blue-50 p-2 rounded">
+                          🔄 جاري تحميل الأقسام المتاحة...
                         </p>
                       )}
-                      {categories.length > 0 && (
-                        <p className="text-xs text-green-600 mt-1">
+                      
+                      {/* حالة عدم وجود أقسام */}
+                      {!categoriesLoading && categories.length === 0 && (
+                        <p className="text-xs text-red-600 mt-1 bg-red-50 p-2 rounded">
+                          ⚠️ لا توجد أقسام في النظام حالياً. يرجى التواصل مع إدارة المتجر.
+                        </p>
+                      )}
+                      
+                      {/* حالة وجود أقسام */}
+                      {!categoriesLoading && categories.length > 0 && (
+                        <p className="text-xs text-green-600 mt-1 bg-green-50 p-2 rounded">
                           ✅ تم العثور على {categories.length} قسم متاح
                         </p>
                       )}
+                      
+                      <p className="text-xs text-gray-500 mt-1">
+                        سيتم إنشاء متجرك كقسم فرعي داخل القسم الرئيسي المختار
+                      </p>
                     </div>
 
                     <div>
@@ -389,7 +433,7 @@ const AuthScreen = () => {
             </Button>
             
             {!isLogin && formData.userType === 'merchant' && categories.length === 0 && (
-              <p className="text-xs text-orange-600 text-center">
+              <p className="text-xs text-orange-600 text-center bg-orange-50 p-2 rounded">
                 لا يمكن إنشاء حساب تاجر بدون وجود أقسام في النظام
               </p>
             )}
