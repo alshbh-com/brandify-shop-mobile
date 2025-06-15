@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useApp } from '@/contexts/AppContext';
-import { Eye, EyeOff, Upload, Store, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, Upload, Store, AlertCircle, User, ShoppingBag } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const AuthScreen = () => {
@@ -35,6 +36,7 @@ const AuthScreen = () => {
     const fetchCategories = async () => {
       setCategoriesLoading(true);
       try {
+        console.log('Fetching categories...');
         const { data, error } = await supabase
           .from('categories')
           .select('*')
@@ -43,8 +45,8 @@ const AuthScreen = () => {
         if (error) {
           console.error('Error fetching categories:', error);
         } else {
+          console.log('Categories fetched successfully:', data);
           setCategories(data || []);
-          console.log('Categories loaded:', data);
         }
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -53,8 +55,11 @@ const AuthScreen = () => {
       }
     };
 
-    fetchCategories();
-  }, []);
+    // تحميل الأقسام فقط عند التسجيل الجديد
+    if (!isLogin) {
+      fetchCategories();
+    }
+  }, [isLogin]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -182,16 +187,40 @@ const AuthScreen = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-1">نوع الحساب</label>
-                  <select
-                    name="userType"
-                    value={formData.userType}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                  >
-                    <option value="user">عميل</option>
-                    <option value="merchant">تاجر</option>
-                  </select>
+                  <label className="block text-sm font-medium mb-2">نوع الحساب</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, userType: 'user' }))}
+                      className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all ${
+                        formData.userType === 'user'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <User className="w-8 h-8 mb-2" />
+                      <span className="font-medium">عميل</span>
+                      <span className="text-xs text-gray-500 text-center mt-1">
+                        للتسوق والشراء
+                      </span>
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, userType: 'merchant' }))}
+                      className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all ${
+                        formData.userType === 'merchant'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <ShoppingBag className="w-8 h-8 mb-2" />
+                      <span className="font-medium">تاجر</span>
+                      <span className="text-xs text-gray-500 text-center mt-1">
+                        لبيع المنتجات
+                      </span>
+                    </button>
+                  </div>
                 </div>
                 
                 {formData.userType === 'merchant' && (
@@ -202,7 +231,7 @@ const AuthScreen = () => {
                         name="storeCategory"
                         value={formData.storeCategory}
                         onChange={handleInputChange}
-                        className="w-full p-2 border border-gray-300 rounded-md"
+                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
                         disabled={categoriesLoading}
                       >
@@ -218,6 +247,11 @@ const AuthScreen = () => {
                       <p className="text-xs text-gray-500 mt-1">
                         سيتم إنشاء متجرك كقسم فرعي داخل القسم الرئيسي المختار
                       </p>
+                      {categories.length === 0 && !categoriesLoading && (
+                        <p className="text-xs text-red-500 mt-1">
+                          لا توجد أقسام متاحة حالياً
+                        </p>
+                      )}
                     </div>
 
                     <div>
