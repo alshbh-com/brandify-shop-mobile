@@ -49,26 +49,25 @@ export const useProducts = () => {
 
       if (productsResponse.error) {
         console.error('❌ Products fetch error:', productsResponse.error);
-        throw productsResponse.error;
+        setError('خطأ في تحميل المنتجات: ' + productsResponse.error.message);
+      } else {
+        const productsData = productsResponse.data || [];
+        console.log(`✅ Products loaded: ${productsData.length} items`);
+        setProducts(productsData);
       }
+
       if (categoriesResponse.error) {
         console.error('❌ Categories fetch error:', categoriesResponse.error);
-        throw categoriesResponse.error;
+        setError('خطأ في تحميل الأقسام: ' + categoriesResponse.error.message);
+      } else {
+        const categoriesData = categoriesResponse.data || [];
+        console.log(`✅ Categories loaded: ${categoriesData.length} items`);
+        setCategories(categoriesData);
       }
-
-      const productsData = productsResponse.data || [];
-      const categoriesData = categoriesResponse.data || [];
-
-      console.log('✅ Data fetched successfully:');
-      console.log(`📦 Products: ${productsData.length} items`);
-      console.log(`📂 Categories: ${categoriesData.length} items`);
-
-      setProducts(productsData);
-      setCategories(categoriesData);
       
     } catch (error: any) {
       console.error('💥 Critical error in fetchData:', error);
-      setError(error.message || 'حدث خطأ في تحميل البيانات');
+      setError('حدث خطأ في تحميل البيانات: ' + error.message);
     } finally {
       setLoading(false);
       console.log('🏁 Data fetch completed');

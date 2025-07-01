@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -19,6 +20,8 @@ export const useStoreSettings = () => {
 
   const fetchSettings = async () => {
     try {
+      console.log('🔄 Fetching store settings...');
+      
       const { data, error } = await supabase
         .from('store_settings')
         .select('*')
@@ -26,45 +29,61 @@ export const useStoreSettings = () => {
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching store settings:', error);
-        // Provide default settings if none exist
-        const defaultSettings: StoreSettings = {
-          id: 'default',
-          store_name: 'متجر البرندات',
-          welcome_image: '/placeholder.svg',
-          admin_password: 'alshbh01278006248alshbh',
-          theme_id: 1
-        };
-        setSettings(defaultSettings);
+        console.error('❌ Error fetching store settings:', error);
+        // إنشاء إعدادات افتراضية إذا لم توجد
+        await createDefaultSettings();
         return;
       }
 
       if (data) {
+        console.log('✅ Store settings loaded:', data);
         setSettings(data);
       } else {
-        // If no data exists, create default settings
-        const defaultSettings: StoreSettings = {
-          id: 'default',
-          store_name: 'متجر البرندات',
-          welcome_image: '/placeholder.svg',
-          admin_password: 'alshbh01278006248alshbh',
-          theme_id: 1
-        };
-        setSettings(defaultSettings);
+        console.log('⚠️ No settings found, creating default...');
+        await createDefaultSettings();
       }
     } catch (error) {
-      console.error('Error fetching store settings:', error);
-      // Provide default settings on error
-      const defaultSettings: StoreSettings = {
+      console.error('💥 Critical error fetching store settings:', error);
+      await createDefaultSettings();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createDefaultSettings = async () => {
+    try {
+      const defaultSettings = {
         id: 'default',
         store_name: 'متجر البرندات',
         welcome_image: '/placeholder.svg',
         admin_password: 'alshbh01278006248alshbh',
         theme_id: 1
       };
-      setSettings(defaultSettings);
-    } finally {
-      setLoading(false);
+
+      const { data, error } = await supabase
+        .from('store_settings')
+        .insert([defaultSettings])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Error creating default settings:', error);
+        // استخدم الإعدادات الافتراضية حتى لو فشل الإدراج
+        setSettings(defaultSettings);
+      } else {
+        console.log('✅ Default settings created:', data);
+        setSettings(data);
+      }
+    } catch (error) {
+      console.error('💥 Error creating default settings:', error);
+      // استخدم الإعدادات الافتراضية كحل أخير
+      setSettings({
+        id: 'default',
+        store_name: 'متجر البرندات',
+        welcome_image: '/placeholder.svg',
+        admin_password: 'alshbh01278006248alshbh',
+        theme_id: 1
+      });
     }
   };
 
@@ -72,7 +91,6 @@ export const useStoreSettings = () => {
     if (!settings) return;
 
     try {
-      // تحديث الحالة المحلية فوراً لتحسين الأداء
       const updatedSettings = { ...settings, ...updates };
       setSettings(updatedSettings);
 
@@ -84,7 +102,6 @@ export const useStoreSettings = () => {
         .single();
 
       if (error) {
-        // إذا فشل التحديث، أرجع للحالة السابقة
         setSettings(settings);
         throw error;
       }
@@ -98,18 +115,23 @@ export const useStoreSettings = () => {
   };
 
   const checkAdminPassword = (password: string): boolean => {
-    console.log('Checking password:', password);
+    console.log('🔐 Checking admin password...');
+    console.log('Input password:', password);
     console.log('Stored password:', settings?.admin_password);
-    console.log('Password match:', settings?.admin_password === password);
     
     if (!settings) {
-      console.log('No settings found');
+      console.log('❌ No settings found');
       return false;
     }
     
-    // تأكد من أن كلمة المرور تتطابق تماماً
-    const isValid = settings.admin_password.trim() === password.trim();
-    console.log('Final validation result:', isValid);
+    const storedPassword = settings.admin_password.trim();
+    const inputPassword = password.trim();
+    const isValid = storedPassword === inputPassword;
+    
+    console.log('Password match result:', isValid);
+    console.log('Stored (trimmed):', storedPassword);
+    console.log('Input (trimmed):', inputPassword);
+    
     return isValid;
   };
 
