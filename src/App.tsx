@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
 import { getThemeById } from "@/data/themes";
+import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -74,6 +75,21 @@ const ThemeWrapper = ({ children }: { children: React.ReactNode }) => {
       body.offsetHeight;
       body.style.display = '';
     }, 60);
+
+    // Test database connection on app start
+    console.log('🚀 App started, testing database connection...');
+    supabase
+      .from('categories')
+      .select('id, name')
+      .limit(1)
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('❌ App startup: Database connection failed:', error);
+        } else {
+          console.log('✅ App startup: Database connection successful');
+          console.log('📊 Sample data:', data);
+        }
+      });
   }, []);
 
   return <>{children}</>;
