@@ -354,6 +354,18 @@ const AdminPanel = () => {
     return ratings.find(r => r.product_id === productId);
   };
 
+  const handleAddCategory = async (category: Omit<any, 'id'>) => {
+    return await addCategory(category);
+  };
+
+  const handleEditCategory = async (id: string, updates: Partial<any>) => {
+    return await updateCategory(id, updates);
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    await deleteCategory(id);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <AdminHeader onLogout={adminLogout} />
@@ -391,9 +403,9 @@ const AdminPanel = () => {
         {activeTab === 'categories' && (
           <CategoriesTab
             categories={categories}
-            onAddCategory={() => setShowCategoryForm(true)}
-            onEditCategory={startEditCategory}
-            onDeleteCategory={deleteCategory}
+            onAddCategory={handleAddCategory}
+            onEditCategory={handleEditCategory}
+            onDeleteCategory={handleDeleteCategory}
           />
         )}
 
@@ -452,9 +464,7 @@ const AdminPanel = () => {
 
         {activeTab === 'approvals' && (
           <ProductApprovalTab
-            approvalRequests={approvalRequests}
             categories={categories}
-            onRefresh={fetchApprovalRequests}
           />
         )}
 

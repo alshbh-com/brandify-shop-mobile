@@ -90,7 +90,7 @@ const CategoriesTab = ({
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('هل أنت متأكد من حذف هذا القسم؟')) {
+    if (window.confirm('هل أنت متأكد من حذف هذا القسم؟')) {
       try {
         await onDeleteCategory(id);
         toast({
@@ -113,6 +113,8 @@ const CategoriesTab = ({
     setFormData({ name: '', image: '/placeholder.svg' });
   };
 
+  const isFormActive = showAddForm || editingId !== null;
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -120,7 +122,7 @@ const CategoriesTab = ({
         <Button
           onClick={() => setShowAddForm(true)}
           className="bg-green-500 hover:bg-green-600"
-          disabled={showAddForm || editingId}
+          disabled={isFormActive}
         >
           <Plus size={16} className="ml-2" />
           إضافة قسم
@@ -225,7 +227,7 @@ const CategoriesTab = ({
                       onClick={() => handleEdit(category)}
                       size="sm"
                       variant="outline"
-                      disabled={showAddForm || editingId}
+                      disabled={isFormActive}
                     >
                       <Edit size={16} />
                     </Button>
@@ -233,7 +235,7 @@ const CategoriesTab = ({
                       onClick={() => handleDelete(category.id)}
                       size="sm"
                       variant="destructive"
-                      disabled={showAddForm || editingId}
+                      disabled={isFormActive}
                     >
                       <Trash2 size={16} />
                     </Button>
