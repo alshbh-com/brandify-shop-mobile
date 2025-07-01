@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -33,7 +32,7 @@ export const useStoreSettings = () => {
           id: 'default',
           store_name: 'متجر البرندات',
           welcome_image: '/placeholder.svg',
-          admin_password: '01204486263',
+          admin_password: 'alshbh01278006248alshbh',
           theme_id: 1
         };
         setSettings(defaultSettings);
@@ -48,7 +47,7 @@ export const useStoreSettings = () => {
           id: 'default',
           store_name: 'متجر البرندات',
           welcome_image: '/placeholder.svg',
-          admin_password: '01204486263',
+          admin_password: 'alshbh01278006248alshbh',
           theme_id: 1
         };
         setSettings(defaultSettings);
@@ -60,7 +59,7 @@ export const useStoreSettings = () => {
         id: 'default',
         store_name: 'متجر البرندات',
         welcome_image: '/placeholder.svg',
-        admin_password: '01204486263',
+        admin_password: 'alshbh01278006248alshbh',
         theme_id: 1
       };
       setSettings(defaultSettings);

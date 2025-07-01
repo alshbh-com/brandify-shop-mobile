@@ -32,7 +32,4 @@ supabase
     } else {
       console.log('✅ Database connection successful, categories found:', data);
     }
-  })
-  .catch(err => {
-    console.error('💥 Critical database error:', err);
   });
